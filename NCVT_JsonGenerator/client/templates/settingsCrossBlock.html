@@ -3,7 +3,7 @@ name: settingsCrossValidationBlock
 url: /settings/CrossValidationBlock
 controller: CtrlSettingCrossBlock
 ---
-<div  ng-controller="CtrlSettingCrossBlock">
+<div  ng-controller="CtrlSettingCrossBlock" ng-init="uploadData(sequence.ID)">
   <form ng-submit="saveCrossBlock()">
     <h2>{{ sequence.Name }}</h2>
     ID: {{ sequence.ID }}<br>
@@ -11,6 +11,6 @@ controller: CtrlSettingCrossBlock
     <button ng-click="reset()">RESET</button>
     <input type="submit" ngClick="Submit" >
   </form>
-  <button ng-click="uploadData()">upload</button>
+  <button ng-click="uploadData(sequence.ID)">upload</button>
   <p>{{msg}}</p>
 </div>

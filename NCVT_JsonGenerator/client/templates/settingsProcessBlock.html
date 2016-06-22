@@ -3,22 +3,29 @@ name: settingsProcessingBlock
 url: /settings/ProcessingBlock
 controller: CtrlSettingProcessBlock
 ---
-<div  ng-controller="CtrlSettingProcessBlock">
-  <form ng-submit="saveProcessBlock()">
+<div  ng-controller="CtrlSettingProcessBlock" ng-init="uploadData(sequence.ID)">
+  <form ng-submit="saveProcessBlock(sequence.ID)">
     <h2>{{ sequence.Name }}</h2>
     ID: {{ sequence.ID }}<br>
     <br><br>
 
     Name of the script<br>
-    <input type="text">{{sequence.nameScript}}
+    <input type="text" ng-model="sequence.nameScript">
 
     Interpreter <br>
-    <input type="text">{{sequence.interpreter}}<br>
-    
-    <input type="text"><br>
+    <input type="text" ng-model="sequence.interpreter">
+    Selection <br>
+    <input type="text" ng-model="sequence.selection">
+    <!-- encore du push node ici -->
+    Inputs <br>
+    <input type="text" ng-model="sequence.inputs">
+    Outputs <br>
+    <input type="text" ng-model="sequence.outputs">
+    Parameters <br>
+
     <button ng-click="reset()">RESET</button>
     <input type="submit" ngClick="Submit" >
   </form>
-  <button ng-click="uploadData()">upload</button>
+  <button ng-click="uploadData(sequence.ID)">upload</button>
   <p>{{msg}}</p>
 </div>

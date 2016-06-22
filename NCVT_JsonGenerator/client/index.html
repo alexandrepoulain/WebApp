@@ -17,7 +17,7 @@
     <div class="grid-frame">
       <div class="grid-block">
         <script type="text/ng-template"  id="tree_item_renderer.html">
-          <button ui-sref="settings{{data.name}}" ng-click="saveDataId(data.ID)">{{data.name}}</button>
+          <button ui-sref="settings{{data.name}}" ui-sref-opts="{reload: true}" ng-click="saveDataId(data.ID)">{{data.name}}</button>
           <div zf-action-sheet="">
             <div zf-as-button="" title="Addblock"></div>
             <div zf-as-content="" position="bottom">

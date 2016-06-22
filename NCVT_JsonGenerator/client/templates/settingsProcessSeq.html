@@ -3,7 +3,7 @@ name: settingsProcessingSequence
 url: /settings/ProcessingSequence
 controller: CtrlSettingProcessSeq
 ---
-<div  ng-controller="CtrlSettingProcessSeq">
+<div  ng-controller="CtrlSettingProcessSeq" ng-init="uploadData(sequence.ID)">
   <form ng-submit="saveSeqBlock()">
     <h2>{{ sequence.Name }}</h2>
     ID: {{ sequence.ID }}<br>
@@ -11,6 +11,4 @@ controller: CtrlSettingProcessSeq
     <button ng-click="reset()">RESET</button>
     <input type="submit" ngClick="Submit" >
   </form>
-  <button ng-click="uploadData()">upload</button>
-  <p>{{msg}}</p>
 </div>

@@ -32,6 +32,7 @@
             $scope.sequence = angular.copy($scope.master);
         };
         $scope.reset();
+
         $scope.saveProcessBlock = function () {
           
           localStorage.setItem($scope.sequence.ID, JSON.stringify($scope.sequence));
@@ -76,7 +77,7 @@
     // control settings CrossValidationBlock
     .controller('CtrlSettingCrossBlock', function($scope, sharedId) {
         var id = sharedId.getProperty();
-        $scope.master = {Name: "CrossValidationBlock", ID: id};
+        $scope.master = {Name: "CrossValidationBlock", ID: id, nameScript: "", interpreter: "", selection: "", inputs: [], outputs: [], parameters: []};
         $scope.reset = function() {
             $scope.sequence = angular.copy($scope.master);
         };
