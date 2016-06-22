@@ -1,0 +1,24 @@
+---
+name: settingsProcessingBlock
+url: /settings/ProcessingBlock
+controller: CtrlSettingProcessBlock
+---
+<div  ng-controller="CtrlSettingProcessBlock">
+  <form ng-submit="saveProcessBlock()">
+    <h2>{{ sequence.Name }}</h2>
+    ID: {{ sequence.ID }}<br>
+    <br><br>
+
+    Name of the script<br>
+    <input type="text">{{sequence.nameScript}}
+
+    Interpreter <br>
+    <input type="text">{{sequence.interpreter}}<br>
+    
+    <input type="text"><br>
+    <button ng-click="reset()">RESET</button>
+    <input type="submit" ngClick="Submit" >
+  </form>
+  <button ng-click="uploadData()">upload</button>
+  <p>{{msg}}</p>
+</div>
