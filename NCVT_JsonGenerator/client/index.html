@@ -9,6 +9,7 @@
     <script src="./assets/js/templates.js"></script>
     <script src="./assets/js/routes.js"></script>
     <script src="./assets/js/app.js"></script>
+    <script type="text/javascript">localStorage.clear();</script>
   </head>
   <body>
     <div class="primary title-bar">
@@ -19,7 +20,7 @@
         <script type="text/ng-template"  id="tree_item_renderer.html">
           <button ui-sref="settings{{data.name}}" ui-sref-opts="{reload: true}" ng-click="saveDataId(data.ID)">{{data.name}}</button>
           <div zf-action-sheet="">
-            <div zf-as-button="" title="Addblock"></div>
+            <div zf-as-button="" title="+"></div>
             <div zf-as-content="" position="bottom">
               <ul>
                 <li><a ng-click="add(data,'ProcessingBlock')">ProcessingBlock</a></li>
@@ -27,7 +28,7 @@
               </ul>
             </div>
           </div>
-          <button ng-click="delete(data)" ng-show="data.nodes.length > 0">Delete nodes</button>
+          <a class="button" ng-click="delete(data)" ng-show="data.nodes.length > 0">-</a>
           <ul>
               <li ng-repeat="data in data.nodes" ng-include="'tree_item_renderer.html'"></li>
           </ul>

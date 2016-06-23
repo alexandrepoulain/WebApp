@@ -18,14 +18,36 @@ controller: CtrlSettingProcessBlock
     <input type="text" ng-model="sequence.selection">
     <!-- encore du push node ici -->
     Inputs <br>
-    <input type="text" ng-model="sequence.inputs">
+    <ul>
+        <li ng-repeat="(key1,value1) in sequence.inputs"> 
+            {{value1}}
+        </li>
+    </ul>
+    <span class="inline-label">
+        <input type="text" ng-model="temp1" placeholder="key"><input type="text" ng-model="value1" placeholder="value"><a class="button" ng-click="addInputs(temp1,value1)">+</a> 
+    </span>
     Outputs <br>
-    <input type="text" ng-model="sequence.outputs">
+    <ul>
+        <li ng-repeat="(key2,value2) in sequence.outputs"> 
+            {{value2}}
+        </li>
+    </ul>
+    <span class="inline-label">
+        <input type="text" ng-model="temp2" placeholder="key"><input type="text" ng-model="value2" placeholder="value"><a class="button" ng-click="addOutputs(temp2,value2)">+</a> 
+    </span>
     Parameters <br>
-
+    <ul>
+        <li ng-repeat="(key3,value3) in sequence.parameters"> 
+            {{value3}}
+        </li>
+    </ul>
+    <span class="inline-label">
+        <input type="text" ng-model="temp3" placeholder="key"><input type="text" ng-model="value3" placeholder="value"><a class="button" ng-click="addParameter(temp3,value3)">+</a> 
+    
+    </span>
     <button ng-click="reset()">RESET</button>
     <input type="submit" ngClick="Submit" >
   </form>
-  <button ng-click="uploadData(sequence.ID)">upload</button>
+  
   <p>{{msg}}</p>
 </div>

@@ -7,10 +7,38 @@ controller: CtrlSettingCrossBlock
   <form ng-submit="saveCrossBlock()">
     <h2>{{ sequence.Name }}</h2>
     ID: {{ sequence.ID }}<br>
+    CrossValidationType: {{sequence["CrossValidationType"]}}
     <br><br>
+    <!-- show the choices just if no choice had been made -->
+	<span ng-show="sequence['CrossValidationType'] == ''">
+	<button class="button" ng-click="chooseTypeCV('k-fold')">k-fold</button>
+	<button class="button" ng-click="chooseTypeCV('leave-one-out')">leave-one-out</button>
+	<button class="button" ng-click="chooseTypeCV('bootstrapping')">bootstrapping</button>		
+	</span>			
+				
+	<!-- show the parameters and fill the form -->
+	<div ng-repeat="(key, value) in sequence.parameters">
+		<!-- If this is not a list -->
+		<div ng-if="key != 'CrossValidationOutput' ">
+			{{key}}:
+			<input type="text" ng-model="sequence.parameters[key]" placeholder="value" >
+		</div>
+		<div ng-if="key == 'CrossValidationOutput'">
+			{{key}}:
+		<!-- If this is a list -->
+		<ul>
+	        <li ng-repeat="(key1,value1) in sequence.parameters['CrossValidationOutput']"> 
+	            {{value1}}
+	        </li>
+	    </ul>
+		<span class="inline-label">
+	        <input type="text" ng-model="temp1" placeholder="key"><input type="text" ng-model="value1" placeholder="value"><a class="button" ng-click="addCVOutput(temp1,value1)">+</a> 
+	    </span>
+		</div>
+	</div>
+
     <button ng-click="reset()">RESET</button>
     <input type="submit" ngClick="Submit" >
   </form>
   <button ng-click="uploadData(sequence.ID)">upload</button>
-  <p>{{msg}}</p>
 </div>
