@@ -4,38 +4,78 @@ url: /settings/CrossValidationBlock
 controller: CtrlSettingCrossBlock
 ---
 <div  ng-controller="CtrlSettingCrossBlock" ng-init="uploadData(sequence.ID)">
-  <form ng-submit="saveCrossBlock()">
+  <form  ng-submit="saveCrossBlock()" ">
     <h2>{{ sequence.Name }}</h2>
     ID: {{ sequence.ID }}<br>
     CrossValidationType: {{sequence["CrossValidationType"]}}
     <br><br>
     <!-- show the choices just if no choice had been made -->
 	<span ng-show="sequence['CrossValidationType'] == ''">
-	<button class="button" ng-click="chooseTypeCV('k-fold')">k-fold</button>
-	<button class="button" ng-click="chooseTypeCV('leave-one-out')">leave-one-out</button>
-	<button class="button" ng-click="chooseTypeCV('bootstrapping')">bootstrapping</button>		
+		<button class="button" ng-click="chooseTypeCV('k-fold')">k-fold</button>
+		<button class="button" ng-click="chooseTypeCV('leave-one-out')">leave-one-out</button>
+		<button class="button" ng-click="chooseTypeCV('bootstrapping')">bootstrapping</button>		
 	</span>			
 				
 	<!-- show the parameters and fill the form -->
 	<div ng-repeat="(key, value) in sequence.parameters">
 		<!-- If this is not a list -->
-		<div ng-if="key != 'CrossValidationOutput' ">
+		<div ng-if="key != 'CrossValidationOutput' && key != 'ParameterSearch' && key != 'OptimizationType'">
 			{{key}}:
 			<input type="text" ng-model="sequence.parameters[key]" placeholder="value" >
 		</div>
+		<!-- If this is a list -->
 		<div ng-if="key == 'CrossValidationOutput'">
 			{{key}}:
-		<!-- If this is a list -->
-		<ul>
-	        <li ng-repeat="(key1,value1) in sequence.parameters['CrossValidationOutput']"> 
-	            {{value1}}
-	        </li>
-	    </ul>
-		<span class="inline-label">
-	        <input type="text" ng-model="temp1" placeholder="key"><input type="text" ng-model="value1" placeholder="value"><a class="button" ng-click="addCVOutput(temp1,value1)">+</a> 
-	    </span>
+			<ul>
+		        <li ng-repeat="data in sequence.parameters['CrossValidationOutput']"> 
+		            {{data}}
+		        </li>
+		    </ul>
+			<span class="inline-label">
+		        <input type="text" ng-model="temp1" placeholder="key"><input type="text" ng-model="value1" placeholder="value"><a class="button" ng-click="addCVOutput(temp1,value1)">+</a> 
+		    </span>
+		</div>
+		
+		<div ng-if="key == 'ParameterSearch'">
+			{{key}}:
+			<ul>
+		        <li ng-repeat="(key2,value2) in sequence.parameters['ParameterSearch']"> 
+		            {{key2}} 
+		            <ul ng-repeat=" (key3,value3) in sequence.parameters.ParameterSearch[key2]">
+		            	<!-- if this isn't Values -->
+		            	<div ng-show="key3 != 'Values'">
+		            		{{key3}}
+		            		<input type="text" ng-model="sequence.parameters.ParameterSearch[key2][key3]">
+		            	</div>
+						<!-- if this is Values -->
+		            	<div ng-show="key3 == 'Values'">
+		            		{{key3}}: {{value3}}
+							<span class="inline-label">
+						        <input type="number" ng-model="number" placeholder="value"><a class="button" ng-click="addCvValues(key2,number)">+</a> 
+						    </span>
+		            	</div>
+		            	
+		            </ul>
+		            	
+		        </li>
+		    </ul>
+		    <button class="button" ng-click="addParameterSearch()">Add parameter</button>
+			
+		</div>
+		<div ng-if="key == 'OptimizationType' " >
+			{{key}}: {{value}}
+			<span ng-show="sequence.parameters['OptimizationType'] == ''">
+				<button class="button" ng-click="setOptimizationType('max')">max</button>
+				<button class="button" ng-click="setOptimizationType('min')">min</button>
+				<button class="button" ng-click="setOptimizationType('none')">none</button>
+			</span>
 		</div>
 	</div>
+	<!-- Once the type chosen, do you want a parameterSearch (if there is not yet)-->
+	 <span ng-show="sequence['CrossValidationType'] != '' && sequence.parameters.hasOwnProperty('ParameterSearch') == false">
+	 	<button class="button" ng-click="addParameterSearchBlock()">Add ParameterSearch</button>
+	 </span>
+	 
 
     <button ng-click="reset()">RESET</button>
     <input type="submit" ngClick="Submit" >

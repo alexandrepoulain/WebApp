@@ -4,7 +4,7 @@ url: /settings/ProcessingBlock
 controller: CtrlSettingProcessBlock
 ---
 <div  ng-controller="CtrlSettingProcessBlock" ng-init="uploadData(sequence.ID)">
-  <form ng-submit="saveProcessBlock(sequence.ID)">
+  <form ng-submit="saveProcessBlock()">
     <h2>{{ sequence.Name }}</h2>
     ID: {{ sequence.ID }}<br>
     <br><br>

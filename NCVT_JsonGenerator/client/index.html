@@ -18,13 +18,23 @@
     <div class="grid-frame">
       <div class="grid-block">
         <script type="text/ng-template"  id="tree_item_renderer.html">
-          <button ui-sref="settings{{data.name}}" ui-sref-opts="{reload: true}" ng-click="saveDataId(data.ID)">{{data.name}}</button>
+          <button ng-if='data.name == "ProcessingSequence"' ng-click="saveJson(data)">{{data.name}}</button>
+          <button ng-if='data.name != "ProcessingSequence"' ui-sref="settings{{data.name}}" ui-sref-opts="{reload: true}" ng-click="saveDataId(data.ID)">{{data.name}}</button>
           <div zf-action-sheet="">
             <div zf-as-button="" title="+"></div>
             <div zf-as-content="" position="bottom">
               <ul>
                 <li><a ng-click="add(data,'ProcessingBlock')">ProcessingBlock</a></li>
-                <li><a ng-click="add(data,'CrossValidationBlock')">CrossValidationBlock</a></li>
+                <li ng-if='data.name == "ProcessingSequence"'><a ng-click="add(data,'CrossValidationBlock')">CrossValidationBlock</a></li>
+                <!-- if this is a CrossValidationBlock we display the choice for the Training and Validation Block -->
+                
+                <li ng-if='data.name == "CrossValidationBlock"'><a ng-click="add(data,'TrainingProcessingBlock')">TrainingProcessingBlock</a></li>
+                <li ng-if='data.name == "CrossValidationBlock"'><a ng-click="add(data,'ValidationProcessingBlock')">ValidationProcessingBlock</a></li>
+
+                <!-- if this is a TrainingProcessingBlock or a ValidationProcessingBlock:
+                      We can just add processingBlocks -->
+
+                
               </ul>
             </div>
           </div>
@@ -33,10 +43,14 @@
               <li ng-repeat="data in data.nodes" ng-include="'tree_item_renderer.html'"></li>
           </ul>
         </script>
-
+        
         <ul ng-controller="TreeController">
+
             <li ng-repeat="data in tree" ng-include="'tree_item_renderer.html'"></li>
+            <button ng-click="saveToPc('json')">SAVE</button>
         </ul>
+        
+        
       </div>
       <div class="grid-block">
         <div ui-view></div>
