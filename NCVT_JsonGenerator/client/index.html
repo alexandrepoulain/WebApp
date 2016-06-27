@@ -14,11 +14,11 @@
   <body>
     <div class="primary title-bar">
       <h2>NCVT Json Generator</h2>      
-    </div ng>
+    </div >
     <div class="grid-frame">
       <div class="grid-block">
         <script type="text/ng-template"  id="tree_item_renderer.html">
-          <button ng-if='data.name == "ProcessingSequence"' ng-click="saveJson(data)">{{data.name}}</button>
+          <button ng-if='data.name == "ProcessingSequence"' ng-click="saveDataId(data.ID); saveJson(data)" ui-sref="settings{{data.name}}" ui-sref-opts="{reload: true}">{{data.name}}</button>
           <button ng-if='data.name != "ProcessingSequence"' ui-sref="settings{{data.name}}" ui-sref-opts="{reload: true}" ng-click="saveDataId(data.ID)">{{data.name}}</button>
           <div zf-action-sheet="">
             <div zf-as-button="" title="+"></div>
@@ -47,7 +47,8 @@
         <ul ng-controller="TreeController">
 
             <li ng-repeat="data in tree" ng-include="'tree_item_renderer.html'"></li>
-            <button ng-click="saveToPc('json')">SAVE</button>
+            <button ng-click="saveToPc()">SAVE</button>
+            <button ng-click="listFiles()">Files</button>
         </ul>
         
         
