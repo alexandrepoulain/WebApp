@@ -3,51 +3,78 @@ name: settingsProcessingBlock
 url: /settings/ProcessingBlock
 controller: CtrlSettingProcessBlock
 ---
-<div  ng-controller="CtrlSettingProcessBlock" ng-init="uploadData(sequence.ID)">
-  <form ng-submit="saveProcessBlock()">
+<div  ng-controller="CtrlSettingProcessBlock" ng-init="uploadData(sequence.ID); ">
+  <form ng-submit="saveProcessBlock(); uploadData(sequence.ID); ">
     <h2>{{ sequence.Name }}</h2>
     ID: {{ sequence.ID }}<br>
     <br><br>
 
     Name of the script<br>
-    <input type="text" ng-model="sequence.nameScript">
+    <input list="suggestScript" type="text" ng-model="sequence.nameScript" ng-change="uploadData(sequence.ID)">
+    <datalist id="suggestScript">
+            <option ng-repeat="x in listScript" value="{{x}}" >
+    </datalist>
 
     Interpreter <br>
     <input type="text" ng-model="sequence.interpreter">
     Selection <br>
     <input type="text" ng-model="sequence.selection">
     <!-- encore du push node ici -->
+   
     Inputs <br>
     <ul>
-        <li ng-repeat="(key1,value1) in sequence.inputs"> 
-            {{value1}}
+        <li ng-repeat="(keyIN, valueIN) in sequence.inputs">
+            <span class="inline-label">
+                {{valueIN}}
+                <button ng-click="deleteInput(valueIN)" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_add_small_01.png"></button>
+            </span>
+            
         </li>
     </ul>
-    <span class="inline-label">
-        <input type="text" ng-model="temp1" placeholder="key"><input type="text" ng-model="value1" placeholder="value"><a class="button" ng-click="addInputs(temp1,value1)">+</a> 
-    </span>
-    Outputs <br>
+    
+    Outputs<br>
     <ul>
-        <li ng-repeat="(key2,value2) in sequence.outputs"> 
-            {{value2}}
+        <li ng-repeat="(keyOUT, valueOUT) in sequence.outputs">
+            <span class="inline-label">
+                {{valueOUT}}
+                <button ng-click="deleteOutput(valueOUT)" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_add_small_01.png"></button>
+            </span>
         </li>
     </ul>
-    <span class="inline-label">
-        <input type="text" ng-model="temp2" placeholder="key"><input type="text" ng-model="value2" placeholder="value"><a class="button" ng-click="addOutputs(temp2,value2)">+</a> 
-    </span>
     Parameters <br>
     <ul>
-        <li ng-repeat="(key3,value3) in sequence.parameters"> 
-            {{value3}}
+        <li ng-repeat="(keyPA, valuePA) in sequence.parameters">
+            <span class="inline-label">
+                {{valuePA}}
+                <button ng-click="deleteParameter(valuePA)" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_cancel_small_01.png"></button>
+            </span>
         </li>
     </ul>
-    <span class="inline-label">
-        <input type="text" ng-model="temp3" placeholder="key"><input type="text" ng-model="value3" placeholder="value"><a class="button" ng-click="addParameter(temp3,value3)">+</a> 
+    Settings <br>
+    <ul>
+        <li ng-repeat="key1 in listToken"> 
+            <span class="inline-label">
+                {{key1}}
+                <input type="text" ng-model="temp1" placeholder="key" >
+                <div zf-action-sheet="">
+                    <div zf-as-button=""><button style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_add_small_01.png"></button></div>
+                    <div zf-as-content="" position="bottom">
+                        <ul>
+                            <li><a ng-click="addInputs(key1,temp1)">Inputs</a></li>
+                            <li><a ng-click="addOutputs(key1,temp1)">Outputs</a></li>
+                            <li><a ng-click="addParameter(key1,temp1)">Parameters</a></li>
+                        </ul>
+                    </div>
+                </div> 
+                <button ng-click="deleteSetting(key1)" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_cancel_small_01.png"></button>
+                
+            </span>
+        </li>
+    </ul>
+
     
-    </span>
-    <button ng-click="reset()">RESET</button>
-    <input type="submit" ngClick="Submit" >
+    <button ngClick="Submit" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_add_01.png"></button>
+    <button ng-click="reset()" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_cancel_01.png" ></button>
   </form>
   
-  <p>{{msg}}</p>
 </div>

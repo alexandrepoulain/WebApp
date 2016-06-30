@@ -4,11 +4,71 @@
     angular.module('application', [
             'ui.router',
             'ngAnimate',
+            'ngResource',
             //foundation
             'foundation',
             'foundation.dynamicRouting',
             'foundation.dynamicRouting.animations'
+
         ])
+
+        .factory('JsonService', function($resource) {
+          return $resource('temp/list_script.json');
+        })
+
+        .controller('ctrl', function($scope, JsonService, listScript, saveToken){
+          JsonService.get(function(data){
+            data = data.toJSON();
+            for (var key in data) {
+                listScript.sendScriptName(key)
+            }
+            saveToken.sendData(data);
+          });
+        })
+         // service for the list script
+        .service('saveToken',function () {
+             var data = {} ;
+             return {
+                // add the data
+                sendData: function (thisData) {
+                     data = thisData ;
+                },
+                // to take the list coresponding to the script  
+                getToken:function (script) {
+                     return data[script]; 
+                }
+             };
+        })
+
+        // service for the list script
+        .service('listScript',function () {
+             var listScript = [] ;
+             return {
+                // add a script
+                sendScriptName: function (scriptName) {
+                     listScript.push(scriptName) ;
+                },
+                // to take the list 
+                getlistScript:function () {
+                     return listScript; 
+                }
+             };
+        })
+
+        // service for the list of outputs
+        .service('listOutputs',function () {
+             var list = [] ;
+             return {
+                // add an output: the value associated to the key output
+                addOutput: function (element) {
+                     list.push(element); 
+                },
+                // to take the list 
+                getList:function () {
+                     return list; 
+                }
+             };
+        })
         // service to share the id 
         .service('sharedId', function() {
             var property = "";
@@ -36,17 +96,24 @@
 
 
     // control settings ProcessingBlock
-    .controller('CtrlSettingProcessBlock', function($scope, sharedId) {
+    .controller('CtrlSettingProcessBlock', function($scope, sharedId, listOutputs, listScript, saveToken) {
         // when we call the controller we take the 
         var id = sharedId.getProperty();
         // creation of the block 
         $scope.master = { Name: "ProcessingBlock", ID: id, nameScript: "", interpreter: "", selection: "", inputs: [], outputs: [], parameters: [] };
+       
         // add inputs
         $scope.addInputs = function(key, value) {
+            // verif is already in it 
             var object = {};
             object[key] = value;
-            $scope.sequence.inputs.push(ret);
+            $scope.sequence.inputs.push(object);
             $scope.saveProcessBlock();
+            console.log($scope.sequence.inputs.length)
+        };
+        // delete input
+        $scope.deleteInput = function(elem){
+            $scope.sequence.inputs.splice(elem,1);
         };
         // add outputs
         $scope.addOutputs = function(key, value) {
@@ -54,14 +121,39 @@
             object[key] = value;
             $scope.sequence.outputs.push(object);
             $scope.saveProcessBlock();
+            // send the output
+            listOutputs.addOutput(value);
+        };
+        // delete output
+        $scope.deleteOutput = function(elem){
+            $scope.sequence.outputs.splice(elem,1);
         };
         // add element in list parameters
         $scope.addParameter = function(key, value) {
+            // first we have to find if the value is not a number
             var object = {};
-            object[key] = value;
+            if (!isNaN(value)){
+                console.log('ICI');
+                object[key] = Number(value);
+            }
+            else {
+                object[key] = value;
+            }
+            
+            console.log(object);
             $scope.sequence.parameters.push(object);
             $scope.saveProcessBlock();
+            $scope.uploadData($scope.sequence.ID);
         };
+        // delete parameter
+        $scope.deleteParameter = function(elem){
+            $scope.sequence.parameters.splice(elem,1);
+        };
+        // to delete the settings wanted
+        $scope.deleteSetting = function (setting) {
+             $scope.listToken.splice(setting,1);
+        };
+
         // reset block to an empty one
         $scope.reset = function() {
             $scope.sequence = angular.copy($scope.master);
@@ -75,6 +167,7 @@
         };
         // get the block by id
         $scope.uploadData = function(id) {
+            $scope.listScript = listScript.getlistScript() ;
             // get the block from the local storage: transform into a js object
             var sessionRestaured =  JSON.parse(localStorage.getItem(id));
             try {
@@ -84,12 +177,54 @@
                 // statements
                 console.log("Pas d'id pour session");
             }
+            $scope.listToken = saveToken.getToken($scope.sequence.nameScript);
+            console.log($scope.listToken)
             console.log(sessionRestaured);
+
         };
+        $scope.reload = function()
+        {
+           location.reload(); 
+        };
+
+        $scope.findInput = function (listToken) {
+            var suggestInput = [];
+            for(var key in listToken) {
+                if (listToken[key].indexOf("Input_FileName") != -1 ){
+                    suggestInput.push(listToken[key]);
+                }
+            }
+            return suggestInput ;
+        };
+        $scope.findOutput = function (listToken) {
+            var suggest = [];
+            for(var key in listToken) {
+                if (listToken[key].indexOf("Output_FileName") != -1 ){
+                    suggest.push(listToken[key]);
+                }
+            }
+            return suggest ; 
+        };     
+        $scope.findParam = function (listToken) {
+            var suggest = [];
+            for(var key in listToken) {
+                if (listToken[key].indexOf("Output_FileName") == -1 && listToken[key].indexOf("Input_FileName") == -1 ){
+                    suggest.push(listToken[key]);
+                }
+            }
+            return suggest ; 
+        };    
+
+        $scope.resetForm = function () {
+             $scope.temp3 = "";
+             $scope.value3 = "";
+        }
+                
+       
     })
 
     // controller settings ProcessingSequence
-    .controller('CtrlSettingProcessSeq', function($scope, $http, sharedId, sharedPath) {
+    .controller('CtrlSettingProcessSeq', function($scope, $http, sharedId, sharedPath, listOutputs) {
         // take the id 
         var id = sharedId.getProperty();
         // if the id is empty we set the id at 1
@@ -131,7 +266,7 @@
 
     // control settings CrossValidationBlock
     // In function of the type of cross validation we change the parameters of the block 
-    .controller('CtrlSettingCrossBlock', function($scope, sharedId) {
+    .controller('CtrlSettingCrossBlock', function($scope, sharedId, listOutputs) {
         // take the id of the node
         var id = sharedId.getProperty();
         // var for the reset
@@ -160,6 +295,8 @@
             object[temp1] = value1;
             $scope.sequence.parameters.CrossValidationOutput.push(object);
             $scope.saveCrossBlock();
+            // send the output to the shared list 
+            listOutputs.addOutput(value1);
         };
         // add a ParameterSearch Block
         $scope.addParameterSearchBlock = function() {
@@ -215,7 +352,7 @@
     })
 
     // Controller for the layout (MAIN)
-    .controller("TreeController", function($scope, sharedId, sharedPath) {
+    .controller("TreeController", function($scope, sharedId, sharedPath, $resource, listOutputs) {
         // delete a node of the tree 
         $scope.delete = function(data) {
             data.nodes = [];
@@ -236,10 +373,11 @@
             if (block) {
                 delete block["Name"];
                 delete block["ID"];
+                block["Parameters"] = [];
                 // for "parameters" we have to take what's inside the list "parameters"
                 if (block.hasOwnProperty("parameters")) {
                     for (var key3 in block["parameters"]) {
-                        block[key3] = block["parameters"][key3];
+                            block["Parameters"].push(block["parameters"][key3]);
                     }
                     // after that we delete it 
                     delete block["parameters"]
@@ -285,6 +423,9 @@
             element[data.name] = object;
             return element;
         }
+
+      
+
         // save the .json on local storage: we have to begin from the processingSequence node
         $scope.saveJson = function(data) {
             var newData = $scope.parseData(data);
@@ -339,7 +480,7 @@
 
     config.$inject = ['$urlRouterProvider', '$locationProvider'];
 
-    function config($urlProvider, $locationProvider) {
+    function config($urlProvider, $locationProvider, $resourceProvider) {
         $urlProvider.otherwise('/');
 
         $locationProvider.html5Mode({

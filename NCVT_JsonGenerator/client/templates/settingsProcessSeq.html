@@ -4,13 +4,16 @@ url: /settings/ProcessingSequence
 controller: CtrlSettingProcessSeq
 ---
 <div  ng-controller="CtrlSettingProcessSeq" ng-init="uploadData(sequence.ID)">
-  <form ng-submit="saveSeqBlock(); sendPath(sequence.path)">
+  <form ng-submit="saveSeqBlock(); getFiles(sequence.path)">
     <h2>{{ sequence.Name }}</h2>
     ID: {{ sequence.ID }}<br>
     <br><br>
     Path <br>
     <input type="text" ng-model="sequence.path">
-    <button ng-click="reset()">RESET</button>
-    <input type="submit" ngClick="Submit" >
-  </form>
+
+     <button ngClick="Submit" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_add_01.png"></button>
+    <button ng-click="reset()" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_cancel_01.png" ></button>
+	
+   
+  </form> 
 </div>

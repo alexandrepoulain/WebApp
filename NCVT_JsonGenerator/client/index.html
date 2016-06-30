@@ -12,8 +12,11 @@
     <script type="text/javascript">localStorage.clear();</script>
   </head>
   <body>
-    <div class="primary title-bar">
-      <h2>NCVT Json Generator</h2>      
+    <div class="primary title-bar" style="padding: 12px;">
+    <span class="title left"><img src="images/mensia-logo-white.png"></span>
+    <span class="right"><h2 style="color: white;">NCVT Json Generator</h2></span>
+      
+           
     </div >
     <div class="grid-frame">
       <div class="grid-block">
@@ -21,7 +24,7 @@
           <button ng-if='data.name == "ProcessingSequence"' ng-click="saveDataId(data.ID); saveJson(data)" ui-sref="settings{{data.name}}" ui-sref-opts="{reload: true}">{{data.name}}</button>
           <button ng-if='data.name != "ProcessingSequence"' ui-sref="settings{{data.name}}" ui-sref-opts="{reload: true}" ng-click="saveDataId(data.ID)">{{data.name}}</button>
           <div zf-action-sheet="">
-            <div zf-as-button="" title="+"></div>
+            <div zf-as-button=""><button style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_add_small_01.png"></button></div>
             <div zf-as-content="" position="bottom">
               <ul>
                 <li><a ng-click="add(data,'ProcessingBlock')">ProcessingBlock</a></li>
@@ -38,7 +41,8 @@
               </ul>
             </div>
           </div>
-          <a class="button" ng-click="delete(data)" ng-show="data.nodes.length > 0">-</a>
+
+          <button ng-click="delete(data)" ng-show="data.nodes.length > 0" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_cancel_small_01.png"></button>
           <ul>
               <li ng-repeat="data in data.nodes" ng-include="'tree_item_renderer.html'"></li>
           </ul>
@@ -47,8 +51,9 @@
         <ul ng-controller="TreeController">
 
             <li ng-repeat="data in tree" ng-include="'tree_item_renderer.html'"></li>
-            <button ng-click="saveToPc()">SAVE</button>
-            <button ng-click="listFiles()">Files</button>
+            <button ng-click="saveToPc()" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_download.png" ></button>
+            <div ng-controller="ctrl">
+            </div>
         </ul>
         
         
@@ -60,6 +65,20 @@
     
     
     
-    <footer class="primary title-bar"></footer>
+    <footer class="primary title-bar">
+      
+      <div class="main-stage">
+          <div class="logo-container">
+            <div class="logo-white"></div>
+          </div>
+          <div class="text-container">
+            Copyright © 2016 - Mensia Technologies SA. <a href="#/legal">Legal Notice</a> <br>
+            <a href="mailto:contact@mensiatech.com">Contact us</a><br>
+            <a href="mailto:support@mensiatech.com">Offline Analysis support</a>
+          </div>
+        </div>
+     </div>
+
+    </footer>
   </body>
 </html>

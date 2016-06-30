@@ -2,9 +2,12 @@
 @import "foundation";
 
 ul {
-    list-style: circle;
+	list-style:none;
 }
 li {
     margin-left: 20px;
+}
+button {
+	border-radius: 8px;
 }
 

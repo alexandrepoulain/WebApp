@@ -37,6 +37,7 @@ var paths = {
     'bower_components/hammerjs/hammer.js',
     'bower_components/angular/angular.js',
     'bower_components/angular-animate/angular-animate.js',
+    'bower_components/angular-resource/angular-resource.js',
     'bower_components/angular-ui-router/release/angular-ui-router.js',
     'bower_components/foundation-apps/js/vendor/**/*.js',
     'bower_components/foundation-apps/js/angular/**/*.js',
@@ -44,7 +45,7 @@ var paths = {
   ],
   // These files are for your app's JavaScript
   appJS: [
-    'client/assets/js/app.js'
+    'client/assets/js/app.js',
   ]
 }
 
@@ -176,3 +177,4 @@ gulp.task('default', ['server'], function () {
   // Watch app templates
   gulp.watch(['./client/templates/**/*.html'], ['copy:templates']);
 });
+
