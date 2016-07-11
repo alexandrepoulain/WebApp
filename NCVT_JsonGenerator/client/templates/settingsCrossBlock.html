@@ -13,7 +13,8 @@ controller: CtrlSettingCrossBlock
 	<span ng-show="sequence['CrossValidationType'] == ''">
 		<button class="button" ng-click="chooseTypeCV('k-fold')">k-fold</button>
 		<button class="button" ng-click="chooseTypeCV('leave-one-out')">leave-one-out</button>
-		<button class="button" ng-click="chooseTypeCV('bootstrapping')">bootstrapping</button>		
+		<button class="button" ng-click="chooseTypeCV('bootstrapping')">bootstrapping</button>
+		<button class="button" ng-click="chooseTypeCV('leave-one-label-out')">leave one label out</button>			
 	</span>			
 				
 	<!-- show the parameters and fill the form -->

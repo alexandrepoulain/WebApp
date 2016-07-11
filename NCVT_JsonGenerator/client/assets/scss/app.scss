@@ -10,4 +10,25 @@ li {
 button {
 	border-radius: 8px;
 }
-
+// On affiche en ligne la div contenant l'input et le texte
+div#infobulle {
+    display: inline;
+}
+ 
+// Mais on cache le texte
+div#infobulle p {
+    display: none;
+}
+ 
+// Et au survol de la partie visible de la div (autrement dit de l'input), on affiche le texte en bloc cette fois-ci
+div#infobulle:hover p {
+    display: block;
+    width: 100px;
+    height: auto;
+    padding: 5px;
+    position: absolute;
+    border: 1px solid black;
+    margin: -20px auto auto 630px;
+    background: #5ba1cf;
+    border-radius: 6px;
+}

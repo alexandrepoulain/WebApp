@@ -5,28 +5,33 @@ controller: CtrlSettingProcessBlock
 ---
 <div  ng-controller="CtrlSettingProcessBlock" ng-init="uploadData(sequence.ID); ">
   <form ng-submit="saveProcessBlock(); uploadData(sequence.ID); ">
-    <h2>{{ sequence.Name }}</h2>
+    <h2>{{ sequence.NameBlock }}</h2>
     ID: {{ sequence.ID }}<br>
     <br><br>
 
     Name of the script<br>
-    <input list="suggestScript" type="text" ng-model="sequence.nameScript" ng-change="uploadData(sequence.ID)">
+    <input list="suggestScript" type="text" ng-model="sequence.Name" ng-change="uploadData(sequence.ID); uploadInterpreter(sequence.Name)">
     <datalist id="suggestScript">
             <option ng-repeat="x in listScript" value="{{x}}" >
     </datalist>
 
     Interpreter <br>
-    <input type="text" ng-model="sequence.interpreter">
+    <input type="text" ng-model="sequence.Interpreter">
+    
     Selection <br>
-    <input type="text" ng-model="sequence.selection">
+    <input list="selct" type="text" ng-model="sequence.Selection">
+    <datalist id="selct">
+        <option ng-repeat="x in listSelection" value="{{x}}" >
+    </datalist>
+
     <!-- encore du push node ici -->
    
     Inputs <br>
     <ul>
-        <li ng-repeat="(keyIN, valueIN) in sequence.inputs">
+        <li ng-repeat="(keyIN, valueIN) in sequence.Inputs">
             <span class="inline-label">
                 {{valueIN}}
-                <button ng-click="deleteInput(valueIN)" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_add_small_01.png"></button>
+                <button ng-click="deleteInput($index)" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_cancel_small_01.png"></button>
             </span>
             
         </li>
@@ -34,10 +39,10 @@ controller: CtrlSettingProcessBlock
     
     Outputs<br>
     <ul>
-        <li ng-repeat="(keyOUT, valueOUT) in sequence.outputs">
+        <li ng-repeat="(keyOUT, valueOUT) in sequence.Outputs">
             <span class="inline-label">
                 {{valueOUT}}
-                <button ng-click="deleteOutput(valueOUT)" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_add_small_01.png"></button>
+                <button ng-click="deleteOutput($index)" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_cancel_small_01.png"></button>
             </span>
         </li>
     </ul>
@@ -46,7 +51,7 @@ controller: CtrlSettingProcessBlock
         <li ng-repeat="(keyPA, valuePA) in sequence.parameters">
             <span class="inline-label">
                 {{valuePA}}
-                <button ng-click="deleteParameter(valuePA)" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_cancel_small_01.png"></button>
+                <button ng-click="deleteParameter($index)" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_cancel_small_01.png"></button>
             </span>
         </li>
     </ul>
@@ -55,7 +60,7 @@ controller: CtrlSettingProcessBlock
         <li ng-repeat="key1 in listToken"> 
             <span class="inline-label">
                 {{key1}}
-                <input type="text" ng-model="temp1" placeholder="key" >
+                <input type="text" ng-model="temp1" placeholder="value" >
                 <div zf-action-sheet="">
                     <div zf-as-button=""><button style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_add_small_01.png"></button></div>
                     <div zf-as-content="" position="bottom">
@@ -66,7 +71,7 @@ controller: CtrlSettingProcessBlock
                         </ul>
                     </div>
                 </div> 
-                <button ng-click="deleteSetting(key1)" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_cancel_small_01.png"></button>
+                
                 
             </span>
         </li>

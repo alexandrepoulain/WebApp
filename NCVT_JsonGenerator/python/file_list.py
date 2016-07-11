@@ -14,6 +14,7 @@
 # is strictly forbidden unless prior written permission is obtained
 # from Mensia Technologies SA.
 ####################################
+
 import os
 import json
 import re
@@ -21,6 +22,7 @@ import re
 
 def parse_line_py(line):
     """ find the parameters in line
+
     Parameters
     ----------
     line: str
@@ -134,12 +136,79 @@ def parse_script(script):
     # opening the script
     if script.endswith('.mxs') or script.endswith('.xml'):
         list_token = token_xml(script)
-    elif script.endswith('.py'):
+    elif script.endswith(('.py', '.R', '.r', '.m')):
         list_token = parameters_py(script)
+    elif script.endswith('.cmd'):
+        list_token = options_cmd(script)
     return list_token
 
 
-def create_json(list_script):
+def options_cmd(script):
+    """ create a list of options for the tool
+
+    Parameter
+    ---------
+    script: str
+        the full path to the script
+
+    Return
+    ------
+    list_options: list
+        list of options
+    """
+    list_tool = ['mensia-mattool', 'mensia-covtool', 'mensia-ajdtool',
+                 'mensia-kmeanstool', 'mensia-meanshifttool']
+    tool = ''
+    # open the script and find the name of the tool
+    with open(script, 'r') as script_file:
+        for line in script_file:
+            line = line.split()
+            # check the line
+            for elem in line:
+                if elem in list_tool:
+                    tool = elem
+    # normaly we have the tool but let's test it
+    if tool == 'mensia-mattool':
+        list_available_options = ['--help', '--output']
+
+    elif tool == 'mensia-covtool':
+        list_available_options = ['--help', '--output', '--max-iterations',
+                                  '--trace-normalization-input',
+                                  '--det-normalization-input',
+                                  '--riemannian', '--euclidean',
+                                  '--trace-normalization-output',
+                                  '--det-normalization-output']
+
+    elif tool == 'mensia-ajdtool':
+        list_available_options = ['--help', '--output-forward',
+                                  '--output-backward',
+                                  '--inputs', '--dimension-reduction']
+
+    elif tool == 'mensia-kmeanstool':
+        list_available_options = ['--help', '--output', '--k-count',
+                                  '--max-iterations',
+                                  '--trace-normalization-input',
+                                  '--det-normalization-input',
+                                  '--riemannian', '--euclidean',
+                                  '--trace-normalization-output',
+                                  '--det-normalization-output']
+
+    elif tool == 'mensia-meanshifttool':
+        list_available_options = ['--help', '--output', '--bandwith',
+                                  '--max-iterations', '--threshold-norm',
+                                  '--trace-normalization-input',
+                                  '--det-normalization-input',
+                                  '--trace-normalization-output',
+                                  '--det-normalization-output']
+    # If the tool isn't one of those we know we check just input and
+    # output
+    else:
+        list_available_options = ['--inputs',
+                                  '--outputs', '--input', '--output']
+    return list_available_options
+
+
+def create_json(list_script, selection):
     """ create a json file with the scripts of the directory
             this .json will be saved in the temp folder
 
@@ -148,6 +217,8 @@ def create_json(list_script):
         ----------
         list_script: list
             the list of the scripts of the folder
+        selection: dict
+            dict of selections available for the database
 
         Returns
         -------
@@ -163,9 +234,53 @@ def create_json(list_script):
         script = script[-2] + '/' + script[-1]
         print(script)
         data[script] = list_token
+    data['Selection'] = selection
     print(data)
     with open('../client/temp/list_script.json', 'w') as outfile:
         json.dump(data, outfile)
+
+
+def check_database(csv_file, column_separator=';'):
+    """ check the database return the name of the column
+    and the selection available for each column
+
+    Parameter:
+    ----------
+    csv_file: str
+        the path to the csv file
+    Return
+    ------
+    dict_database: dict
+        each key is associated to the name of a column
+        each value is a list of selection available for this key/column
+    """
+    list_selection = []
+    list_column = []
+    dicti = {}
+    # open the database
+    with open(csv_file, 'r') as csv_database:
+        # we take the first line
+        list_keys = csv_database.readline().strip().split(
+            column_separator)
+        for line in csv_database:
+
+            line = line.strip().split(column_separator)
+            
+            # initialisation
+            for i in range(len(list_keys)):
+                list_column.append([])
+                list_selection.append([])
+            # we take the column
+            for i in range(len(list_keys)):
+                list_column[i].append(line[i])
+    # now we make the selection
+    for i in range(len(list_keys)):
+        for elem in list_column[i]:
+            if elem not in list_selection[i]:
+                list_selection[i].append(elem)
+        dicti[list_keys[i]] = list_selection[i]
+    del dicti['FileName']
+    return dicti
 
 
 def open_files(path):
@@ -183,15 +298,21 @@ def open_files(path):
     list_file = []
     list_script = []
     try:
+
         for root, dirs, files in os.walk(path, topdown=False):
             for name in files:
                 list_file.append(os.path.join(root, name))
         for file in list_file:
-            if file.endswith('.py') or file.endswith('.cmd') or file.endswith('.xml') or file.endswith('.mxs'):
+            # get the name of the scripts
+            if file.endswith(('.py', '.cmd', '.xml', '.mxs')):
                 list_script.append(file)
-        create_json(list_script)
+            # get the name of the config file
+            if file.endswith('.csv'):
+                csv_file = file
+        selection = check_database(csv_file)
+        create_json(list_script, selection)
     except:
         raise ValueError("abording ...")
 
-path = input("Enter the path of your directory")
+path = input("Enter the path of your directory:")
 open_files(path)

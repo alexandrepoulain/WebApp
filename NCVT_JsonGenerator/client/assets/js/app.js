@@ -16,14 +16,31 @@
           return $resource('temp/list_script.json');
         })
 
-        .controller('ctrl', function($scope, JsonService, listScript, saveToken){
+        .controller('ctrl', function($scope, JsonService, listScript, saveToken, selection){
           JsonService.get(function(data){
             data = data.toJSON();
             for (var key in data) {
-                listScript.sendScriptName(key)
+                if (key == 'Selection'){
+                    selection.sendSelect(data[key])
+                }
+                else{
+                    listScript.sendScriptName(key)
+                }
+                
             }
             saveToken.sendData(data);
           });
+        })
+        .service('selection',function () {
+            var data = [];
+            return {
+                sendSelect: function (value) {
+                    data = value
+                },
+                getSelect: function () {
+                     return data 
+                }
+            };
         })
          // service for the list script
         .service('saveToken',function () {
@@ -96,58 +113,79 @@
 
 
     // control settings ProcessingBlock
-    .controller('CtrlSettingProcessBlock', function($scope, sharedId, listOutputs, listScript, saveToken) {
+    .controller('CtrlSettingProcessBlock', function($scope, sharedId, listOutputs, listScript, saveToken, selection) {
         // when we call the controller we take the 
         var id = sharedId.getProperty();
         // creation of the block 
-        $scope.master = { Name: "ProcessingBlock", ID: id, nameScript: "", interpreter: "", selection: "", inputs: [], outputs: [], parameters: [] };
+        $scope.master = { NameBlock: "ProcessingBlock", ID: id, Name: "", Interpreter: "", Selection: "", Inputs: [], Outputs: [], parameters: [] };
        
+
+        // Selection all or list
+        // how to display choices like class 0
+
+        // change list of interpreter
+        $scope.uploadInterpreter = function(scriptName){
+            if (scriptName.endsWith('.mxs') || scriptName.endsWith('.xml')){
+                $scope.sequence.Interpreter = "NeuroRT" ;
+            }
+            else if (scriptName.endsWith('.py')) {
+                $scope.sequence.Interpreter = "Python" ;
+            }
+            else if (scriptName.endsWith('.r') || scriptName.endsWith('.R') ) {
+                $scope.sequence.Interpreter = "R" ;
+            }
+            else if (scriptName.endsWith('.m')) {
+                $scope.sequence.Interpreter = "Matlab" ;
+            }
+            else if (scriptName.endsWith('.cmd')) {
+                $scope.sequence.Interpreter = "Shell" ;
+            }
+        };
+
+
         // add inputs
         $scope.addInputs = function(key, value) {
             // verif is already in it 
             var object = {};
             object[key] = value;
-            $scope.sequence.inputs.push(object);
+            $scope.sequence.Inputs.push(object);
             $scope.saveProcessBlock();
-            console.log($scope.sequence.inputs.length)
         };
         // delete input
-        $scope.deleteInput = function(elem){
-            $scope.sequence.inputs.splice(elem,1);
+        $scope.deleteInput = function(index){
+            $scope.sequence.Inputs.splice(index,1);
         };
         // add outputs
         $scope.addOutputs = function(key, value) {
             var object = {};
             object[key] = value;
-            $scope.sequence.outputs.push(object);
+            $scope.sequence.Outputs.push(object);
             $scope.saveProcessBlock();
             // send the output
             listOutputs.addOutput(value);
         };
         // delete output
-        $scope.deleteOutput = function(elem){
-            $scope.sequence.outputs.splice(elem,1);
+        $scope.deleteOutput = function(index){
+            $scope.sequence.Outputs.splice(index,1);
         };
         // add element in list parameters
         $scope.addParameter = function(key, value) {
             // first we have to find if the value is not a number
             var object = {};
             if (!isNaN(value)){
-                console.log('ICI');
                 object[key] = Number(value);
             }
             else {
                 object[key] = value;
             }
             
-            console.log(object);
             $scope.sequence.parameters.push(object);
             $scope.saveProcessBlock();
             $scope.uploadData($scope.sequence.ID);
         };
         // delete parameter
-        $scope.deleteParameter = function(elem){
-            $scope.sequence.parameters.splice(elem,1);
+        $scope.deleteParameter = function(index){
+            $scope.sequence.parameters.splice(index,1);
         };
         // to delete the settings wanted
         $scope.deleteSetting = function (setting) {
@@ -175,11 +213,9 @@
                     $scope.sequence = sessionRestaured;
             } catch (e) {
                 // statements
-                console.log("Pas d'id pour session");
             }
-            $scope.listToken = saveToken.getToken($scope.sequence.nameScript);
-            console.log($scope.listToken)
-            console.log(sessionRestaured);
+            $scope.listSelection = selection.getSelect();
+            $scope.listToken = saveToken.getToken($scope.sequence.Name);
 
         };
         $scope.reload = function()
@@ -218,7 +254,7 @@
         $scope.resetForm = function () {
              $scope.temp3 = "";
              $scope.value3 = "";
-        }
+        };
                 
        
     })
@@ -258,7 +294,6 @@
                 // statements
                 console.log("No id for the session");
             }
-            console.log(sessionRestaured);
         };
 
 
@@ -270,7 +305,7 @@
         // take the id of the node
         var id = sharedId.getProperty();
         // var for the reset
-        $scope.master = { Name: "CrossValidationBlock", ID: id, "CrossValidationType": "" };
+        $scope.master = { NameBlock: "CrossValidationBlock", ID: id, "CrossValidationType": "" };
         // function to choose the type of CV we want
         $scope.chooseTypeCV = function(type) {
             // in function on the type we give the parameters
@@ -285,6 +320,10 @@
             // No CVCount 
             if (type == 'leave-one-out') {
                 $scope.sequence.parameters = { "CrossValidationOutput": [] }
+            }
+            
+            if (type == 'leave-one-label-out') {
+                $scope.sequence.parameters = { "CrossValidationOutput": [] }   
             }
 
         };
@@ -301,7 +340,7 @@
         // add a ParameterSearch Block
         $scope.addParameterSearchBlock = function() {
             // we make the block and then we put him into the block sequence 
-            var ParameterSearchBlock = { "ParameterSearch": [] };
+            var ParameterSearchBlock = {"ParameterSearch": []};
             $scope.sequence.parameters["ParameterSearch"] = [];
             $scope.sequence.parameters["OptimizedOutput"] = "";
             $scope.sequence.parameters["OptimizationType"] = "";
@@ -347,7 +386,6 @@
             } catch (e) {
                 console.log("No id for the session");
             }
-            console.log(sessionRestaured);
         };
     })
 
@@ -355,13 +393,46 @@
     .controller("TreeController", function($scope, sharedId, sharedPath, $resource, listOutputs) {
         // delete a node of the tree 
         $scope.delete = function(data) {
-            data.nodes = [];
+            if(data.ID != '1') {
+                var index = -1 ;
+                for (var i = 0; i < $scope.tree[0].nodes.length; i++) {
+                    var elem = $scope.tree[0].nodes[i];
+
+                    $scope.findData(data, elem);
+                    
+                    
+                    if (elem.ID == data.ID) {
+                        index = i;
+                    }
+                      
+                }
+                if (index > -1) {
+                    $scope.tree[0].nodes.splice(index, 1);
+                }
+            }
+        };
+
+        $scope.findData = function (data, son) {
+            var index = -1 ;
+            for (var i = 0; i < son.nodes.length; i++) {
+                var elem = son.nodes[i] ;
+                $scope.findData(data, elem);
+                
+                if (elem.ID == data.ID) {
+                    index = i;
+                    
+                }
+            } 
+            if (index > -1) {
+                son.nodes.splice(index, 1);
+            }
         };
         // add a node for the tree
         $scope.add = function(data, newName) {
             var post = data.nodes.length + 1;
             var id = data.ID + '-' + post;
             data.nodes.push({ name: newName, ID: id, nodes: [] });
+            localStorage.setItem('node' + data.ID, JSON.stringify(data));
         };
         // this function will parse the blocks recursively
         // we find the block with the id of the node and after that 
@@ -371,7 +442,7 @@
             var block = JSON.parse(localStorage.getItem(data.ID));
             // delete "ID" and "Name"
             if (block) {
-                delete block["Name"];
+                delete block["NameBlock"];
                 delete block["ID"];
                 block["Parameters"] = [];
                 // for "parameters" we have to take what's inside the list "parameters"
@@ -409,7 +480,6 @@
                         for (var key in son) {
                             object_temp[key] = son[key];
                             object = angular.extend(object, object_temp);
-                            console.log(object);
                         }
                     }
                 }

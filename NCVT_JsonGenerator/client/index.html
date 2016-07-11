@@ -42,7 +42,7 @@
             </div>
           </div>
 
-          <button ng-click="delete(data)" ng-show="data.nodes.length > 0" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_cancel_small_01.png"></button>
+          <button ng-click="delete(data)" ng-if='data.name != "ProcessingSequence"' style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_cancel_small_01.png"></button>
           <ul>
               <li ng-repeat="data in data.nodes" ng-include="'tree_item_renderer.html'"></li>
           </ul>
