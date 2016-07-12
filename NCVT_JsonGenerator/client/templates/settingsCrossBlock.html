@@ -5,76 +5,89 @@ controller: CtrlSettingCrossBlock
 ---
 <div  ng-controller="CtrlSettingCrossBlock" ng-init="uploadData(sequence.ID)">
   <form  ng-submit="saveCrossBlock()" ">
-    <h2>{{ sequence.Name }}</h2>
+    <h2>CrossValidationBlock</h2>
     ID: {{ sequence.ID }}<br>
-    CrossValidationType: {{sequence["CrossValidationType"]}}
     <br><br>
     <!-- show the choices just if no choice had been made -->
-	<span ng-show="sequence['CrossValidationType'] == ''">
-		<button class="button" ng-click="chooseTypeCV('k-fold')">k-fold</button>
-		<button class="button" ng-click="chooseTypeCV('leave-one-out')">leave-one-out</button>
-		<button class="button" ng-click="chooseTypeCV('bootstrapping')">bootstrapping</button>
-		<button class="button" ng-click="chooseTypeCV('leave-one-label-out')">leave one label out</button>			
-	</span>			
+    		
 				
 	<!-- show the parameters and fill the form -->
-	<div ng-repeat="(key, value) in sequence.parameters">
+	<div ng-repeat="(key, value) in sequence">
 		<!-- If this is not a list -->
-		<div ng-if="key != 'CrossValidationOutput' && key != 'ParameterSearch' && key != 'OptimizationType'">
-			{{key}}:
-			<input type="text" ng-model="sequence.parameters[key]" placeholder="value" >
-		</div>
-		<!-- If this is a list -->
-		<div ng-if="key == 'CrossValidationOutput'">
-			{{key}}:
-			<ul>
-		        <li ng-repeat="data in sequence.parameters['CrossValidationOutput']"> 
-		            {{data}}
-		        </li>
-		    </ul>
-			<span class="inline-label">
-		        <input type="text" ng-model="temp1" placeholder="key"><input type="text" ng-model="value1" placeholder="value"><a class="button" ng-click="addCVOutput(temp1,value1)">+</a> 
-		    </span>
-		</div>
-		
-		<div ng-if="key == 'ParameterSearch'">
-			{{key}}:
-			<ul>
-		        <li ng-repeat="(key2,value2) in sequence.parameters['ParameterSearch']"> 
-		            <ul ng-repeat=" (key3,value3) in sequence.parameters.ParameterSearch[key2]">
-		            	<!-- if this isn't Values -->
-
-		            	<div ng-show="key3 != 'Values'">
-		            		{{key3}}
-		            		<input type="text" ng-model="sequence.parameters.ParameterSearch[key2][key3]">
-		            		<button ng-if="key3 == 'SearchCount'" ng-click="deleteSearchCount(key2)" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_cancel_small_01.png"></button>
-		            	</div>
-						<!-- if this is Values -->
-		            	<div ng-show="key3 == 'Values'">
-		            		{{key3}}: {{value3}}
-							<span class="inline-label">
-						        <input type="number" ng-model="number" placeholder="value"><a class="button" ng-click="addCvValues(key2,number)">+</a> 
-						    </span>
-		            	</div>
-		            	
-		            </ul>
-		            	
-		        </li>
-		    </ul>
-		    <button class="button" ng-click="addParameterSearch()">Add parameter</button>
+		<div ng-if="key != 'ID' && key != 'NameBlock' && key != 'parameters'">
+			<div ng-if="key == 'CrossValidationType'">
+				CrossValidationType: {{sequence['CrossValidationType']}}
+				<span ng-show="sequence['CrossValidationType'] == ''">
+					<button class="button" ng-click="chooseTypeCV('k-fold')">k-fold</button>
+					<button class="button" ng-click="chooseTypeCV('leave-one-out')">leave-one-out</button>
+					<button class="button" ng-click="chooseTypeCV('bootstrapping')">bootstrapping</button>
+					<button class="button" ng-click="chooseTypeCV('leave-one-label-out')">leave one label out</button>			
+				</span>	
+			</div>
+			<div ng-if="key != 'CrossValidationOutput' && key != 'ParameterSearch' && key != 'OptimizationType' && key != 'CrossValidationType'">
+				{{key}}:
+				<input type="text" ng-model="sequence[key]" placeholder="value" >
+			</div>
+			<!-- If this is a list -->
+			<div ng-if="key == 'CrossValidationOutput'">
+				{{key}}:
+				<ul>
+			        <li ng-repeat="data in sequence['CrossValidationOutput']"> 
+			            {{data}}
+			        </li>
+			    </ul>
+				<span class="inline-label">
+			        <input type="text" ng-model="temp1" placeholder="key"><input type="text" ng-model="value1" placeholder="value"><a class="button" ng-click="addCVOutput(temp1,value1)">+</a> 
+			    </span>
+			</div>
 			
-		</div>
-		<div ng-if="key == 'OptimizationType' " >
-			{{key}}: {{value}}
-			<span ng-show="sequence.parameters['OptimizationType'] == ''">
-				<button class="button" ng-click="setOptimizationType('max')">max</button>
-				<button class="button" ng-click="setOptimizationType('min')">min</button>
-				<button class="button" ng-click="setOptimizationType('none')">none</button>
-			</span>
+			<div ng-if="key == 'ParameterSearch'">
+				{{key}}:
+				<ul>
+			        <li ng-repeat="(key2,value2) in sequence['ParameterSearch']"> 
+			            <ul ng-repeat=" (key3,value3) in sequence.ParameterSearch[key2]">
+			            	<!-- if this isn't Values -->
+			            	<div ng-if="key3 == 'Values'">
+			            		{{key3}}: 
+			            		<input type="text" ng-model="sequence.ParameterSearch[key2][key3]">
+			            	</div>
+							<div ng-if="key3 == 'TypeValue'">
+								{{key3}}: {{value3}}
+								<span ng-show="sequence.ParameterSearch[key2]['TypeValue'] == ''">
+									<button class="button" ng-click="setTypeValue(key2, 'float')">float</button>
+									<button class="button" ng-click="setTypeValue(key2, 'integer')">integer</button>
+									<button class="button" ng-click="setTypeValue(key2, 'boolean')">boolean</button>
+									<button class="button" ng-click="setTypeValue(key2, 'string')">string</button>
+								</span>
+							</div>
+			            	
+							<!-- if this is Values -->
+			            	<div ng-show="key3 == 'Values'">
+			            		{{key3}}: {{value3}}
+								<span class="inline-label">
+							        <input type="number" ng-model="number" placeholder="value"><a class="button" ng-click="addCvValues(key2,number)">+</a> 
+							    </span>
+			            	</div>
+			            	
+			            </ul>
+			            	
+			        </li>
+			    </ul>
+			    <button class="button" ng-click="addParameterSearch()">Add parameter</button>
+				
+			</div>
+			<div ng-if="key == 'OptimizationType' " >
+				{{key}}: {{value}}
+				<span ng-show="sequence['OptimizationType'] == ''">
+					<button class="button" ng-click="setOptimizationType('max')">max</button>
+					<button class="button" ng-click="setOptimizationType('min')">min</button>
+					<button class="button" ng-click="setOptimizationType('none')">none</button>
+				</span>
+			</div>
 		</div>
 	</div>
 	<!-- Once the type chosen, do you want a parameterSearch (if there is not yet)-->
-	 <span ng-show="sequence['CrossValidationType'] != '' && sequence.parameters.hasOwnProperty('ParameterSearch') == false">
+	 <span ng-show="sequence['CrossValidationType'] != '' && sequence.hasOwnProperty('ParameterSearch') == false">
 	 	<button class="button" ng-click="addParameterSearchBlock()">Add ParameterSearch</button>
 	 </span>
 	 

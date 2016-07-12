@@ -106,10 +106,11 @@ controller: CtrlSettingProcessBlock
             </div>
         </li>
     </ul>
+     <button ng-click="resetSettings()" >Reset settings</button> <br>
 
     
     <button ng-click="saveProcessBlock(); uploadData(sequence.ID);" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_add_01.png"></button>
-    <button ng-click="resetSettings()" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_cancel_01.png" ></button>
+    <button ng-click="reset()" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_cancel_01.png" ></button>
   </form>
   
 </div>

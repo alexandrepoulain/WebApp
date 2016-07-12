@@ -386,18 +386,16 @@
             $scope.sequence["CrossValidationType"] = type;
             // add CVCount 
             if (type == 'k-fold' || type == 'bootstrapping') {
-                $scope.sequence.parameters = {
-                    "CrossValidationCount": "",
-                    "CrossValidationOutput": []
-                };
+                $scope.sequence["CrossValidationCount"] = "" ;
+                $scope.sequence["CrossValidationOutput"] = [] ;
             }
             // No CVCount 
             if (type == 'leave-one-out') {
-                $scope.sequence.parameters = { "CrossValidationOutput": [] }
+                $scope.sequence["CrossValidationOutput"] = [] ;
             }
             
             if (type == 'leave-one-label-out') {
-                $scope.sequence.parameters = { "CrossValidationOutput": [] }   
+                $scope.sequence["CrossValidationOutput"] = []    
             }
 
         };
@@ -406,7 +404,7 @@
         $scope.addCVOutput = function(temp1, value1) {
             var object = {};
             object[temp1] = value1;
-            $scope.sequence.parameters.CrossValidationOutput.push(object);
+            $scope.sequence.CrossValidationOutput.push(object);
             $scope.saveCrossBlock();
             // send the output to the shared list 
             listOutputs.addOutput(value1);
@@ -415,9 +413,9 @@
         $scope.addParameterSearchBlock = function() {
             // we make the block and then we put him into the block sequence 
             var ParameterSearchBlock = {"ParameterSearch": []};
-            $scope.sequence.parameters["ParameterSearch"] = [];
-            $scope.sequence.parameters["OptimizedOutput"] = "";
-            $scope.sequence.parameters["OptimizationType"] = "";
+            $scope.sequence["ParameterSearch"] = [];
+            $scope.sequence["OptimizedOutput"] = "";
+            $scope.sequence["OptimizationType"] = "";
         };
         // add a ParameterSearch
         $scope.addParameterSearch = function() {
@@ -430,21 +428,26 @@
                 "SearchType": "",
                 "SearchCount": ""
             };
-            $scope.sequence.parameters["ParameterSearch"].push(ParameterSearchVar);
+            $scope.sequence["ParameterSearch"].push(ParameterSearchVar);
         };
         $scope.deleteSearchCount = function (indexOfSearch) {
-            delete($scope.sequence.parameters["ParameterSearch"][indexOfSearch]["SearchCount"]);
+            delete($scope.sequence["ParameterSearch"][indexOfSearch]["SearchCount"]);
         };
         // add a value 
         $scope.addCvValues = function(key2, number) {
-            $scope.sequence.parameters.ParameterSearch[key2]['Values'].push(number);
+            $scope.sequence.ParameterSearch[key2]['Values'].push(number);
             $scope.saveCrossBlock();
         };
+        // set TypeValue 
+        $scope.setTypeValue = function (key2, typeValue) {
+            $scope.sequence.ParameterSearch[key2]['TypeValue'] = typeValue ; 
+        }
         // set the OptimizationType
         $scope.setOptimizationType = function(param) {
-            $scope.sequence.parameters['OptimizationType'] = param;
+            $scope.sequence['OptimizationType'] = param ;
             $scope.saveCrossBlock();
         }
+
         // reset of the block
         $scope.reset = function() {
             $scope.sequence = angular.copy($scope.master);
@@ -521,15 +524,20 @@
             if (block) {
                 delete block["NameBlock"];
                 delete block["ID"];
-                if (block['Inputs'].length == 0) {
-                    delete block['Inputs']
+                if (block.hasOwnProperty("Inputs")) {
+                    if (block['Inputs'].length == 0) {
+                        delete block['Inputs']
+                    }
                 }
-                if (block['Outputs'].length == 0) {
-                    delete block['Outputs']
+                if (block.hasOwnProperty("Outputs")) {
+                    if (block['Outputs'].length == 0) {
+                        delete block['Outputs']
+                    }
                 }
-                block["Parameters"] = [];
+                
                 // for "parameters" we have to take what's inside the list "parameters"
                 if (block.hasOwnProperty("parameters")) {
+                    block["Parameters"] = [];
                     if(block["parameters"].length == 0) {
                         delete block["Parameters"]
                     }
