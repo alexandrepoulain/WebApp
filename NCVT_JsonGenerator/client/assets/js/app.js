@@ -19,6 +19,7 @@
         .controller('ctrl', function($scope, JsonService, listScript, saveToken, selection){
           JsonService.get(function(data){
             data = data.toJSON();
+            console.log(data)
             for (var key in data) {
                 if (key == 'Selection'){
                     selection.sendSelect(data[key])
@@ -26,7 +27,6 @@
                 else{
                     listScript.sendScriptName(key)
                 }
-                
             }
             saveToken.sendData(data);
           });
@@ -34,11 +34,11 @@
         .service('selection',function () {
             var data = [];
             return {
-                sendSelect: function (value) {
-                    data = value
+                sendSelect: function (value_select) {
+                    data = value_select
                 },
                 getSelect: function () {
-                     return data 
+                    return data 
                 }
             };
         })
@@ -48,11 +48,11 @@
              return {
                 // add the data
                 sendData: function (thisData) {
-                     data = thisData ;
+                    data = thisData ;
                 },
                 // to take the list coresponding to the script  
                 getToken:function (script) {
-                     return data[script]; 
+                    return data[script]; 
                 }
              };
         })
@@ -98,31 +98,36 @@
                 }
             };
         })
-        // service to share the path between the template ProcessingSequence and the layout  
-        .service('sharedPath', function() {
-            var path = "";
+        // service for parsing tokens ncvt
+        .service('tokenNCVT', function(){
             return {
-                getPath: function() {
-                    return path;
-                },
-                setPath: function(value) {
-                    path = value;
+                parseTokenNCVT: function(value) {
+                    var list_original = ['all', 'each_temp', 'each_original', 'all_temp', 'all_original', 'vc', 'dbdesc']
+                    // find the ncvt tokens and test them
+                    var Regex = /[^{}]+(?=\})/g ;
+                    var list_token = value.match(Regex);
+                    if(list_token){
+                        for (var i = 0; i < list_token.length; i++) {
+                            var token = list_token[i];
+                            if (list_original.indexOf(token) == -1 ) {
+                                return false;
+                            }
+                        }
+                    }
+                    return true;
                 }
-            };
+            };  
         })
 
 
+
     // control settings ProcessingBlock
-    .controller('CtrlSettingProcessBlock', function($scope, sharedId, listOutputs, listScript, saveToken, selection) {
+    .controller('CtrlSettingProcessBlock', function($scope, sharedId, listOutputs, listScript, saveToken, selection, tokenNCVT) {
         // when we call the controller we take the 
         var id = sharedId.getProperty();
         // creation of the block 
-        $scope.master = { NameBlock: "ProcessingBlock", ID: id, Name: "", Interpreter: "", Selection: "", Inputs: [], Outputs: [], parameters: [] };
-       
-
-        // Selection all or list
-        // how to display choices like class 0
-
+        $scope.master = { NameBlock: "ProcessingBlock", ID: id, Name: "", Interpreter: "", Selection: [], Inputs: [], Outputs: [], parameters: [] };
+        
         // change list of interpreter
         $scope.uploadInterpreter = function(scriptName){
             if (scriptName.endsWith('.mxs') || scriptName.endsWith('.xml')){
@@ -141,15 +146,35 @@
                 $scope.sequence.Interpreter = "Shell" ;
             }
         };
-
-
+        // Selection all or list
+        $scope.addSelection = function (elem) {
+            if (elem == "${all}") {
+                alert('ici')
+                $scope.sequence.Selection = "${all}" ;
+            }
+            else {
+                elem = JSON.parse(elem) ;
+                console.log(elem)
+                $scope.sequence.Selection.push(elem) ;
+            }
+        };
+        $scope.deleteSelection = function (index) {
+            $scope.sequence.Selection.splice(index,1);
+        };
+        $scope.deleteTokenAll = function () {
+            $scope.sequence.Selection = []
+        };
         // add inputs
         $scope.addInputs = function(key, value) {
             // verif is already in it 
-            var object = {};
-            object[key] = value;
-            $scope.sequence.Inputs.push(object);
-            $scope.saveProcessBlock();
+            if (!tokenNCVT.parseTokenNCVT(value)) {
+                $scope.sequence.Inputs[value] = false ;
+            }
+            else {
+                var object = {};
+                object[key] = value;
+                $scope.sequence.Inputs.push(object);
+            }
         };
         // delete input
         $scope.deleteInput = function(index){
@@ -157,12 +182,16 @@
         };
         // add outputs
         $scope.addOutputs = function(key, value) {
-            var object = {};
-            object[key] = value;
-            $scope.sequence.Outputs.push(object);
-            $scope.saveProcessBlock();
-            // send the output
-            listOutputs.addOutput(value);
+            if (!tokenNCVT.parseTokenNCVT(value)) {
+                $scope.sequence.Inputs[value] = false ;
+            }
+            else{
+                var object = {};
+                object[key] = value;
+                $scope.sequence.Outputs.push(object);
+                // send the output
+                listOutputs.addOutput(value);
+            }
         };
         // delete output
         $scope.deleteOutput = function(index){
@@ -171,17 +200,20 @@
         // add element in list parameters
         $scope.addParameter = function(key, value) {
             // first we have to find if the value is not a number
-            var object = {};
-            if (!isNaN(value)){
-                object[key] = Number(value);
+            if (!tokenNCVT.parseTokenNCVT(value)) {
+                $scope.sequence.Inputs[value] = false ;
             }
             else {
-                object[key] = value;
+                var object = {};
+                if (!isNaN(value)){
+                    object[key] = Number(value);
+                }
+                else {
+                    object[key] = value;
+                }
+                $scope.sequence.parameters.push(object);
+                $scope.uploadData($scope.sequence.ID);
             }
-            
-            $scope.sequence.parameters.push(object);
-            $scope.saveProcessBlock();
-            $scope.uploadData($scope.sequence.ID);
         };
         // delete parameter
         $scope.deleteParameter = function(index){
@@ -198,10 +230,52 @@
         };
         // needed to the initialisation
         $scope.reset();
+        // check if all the parameters have been filled
+        $scope.check = function () {
+            // go through the block created
+            // find the keys in Inputs, Outputs and Parameters
+            // push all the keys in a global list
+            var list_global = [];
+            for(var key in $scope.sequence) {
+                if (key == 'parameters' || key == 'Inputs' || key == 'Outputs') {
+                    for(var index in $scope.sequence[key]) {
+                        for(var new_key in $scope.sequence[key][index]) {
+                            list_global.push(new_key);
+                        }
+                    }
+                }
+            }
+            // make the comparison between
+            for (var setting in $scope.listToken) {
+                console.log($scope.listToken[setting])
+                if(list_global.indexOf($scope.listToken[setting]) == -1) {
+                    return false;
+                }
+            }
+            return true; 
+
+        };
+        // delete in list of settings
+        $scope.deleteInList = function (index) {
+            $scope.listToken.splice(index, 1);
+        };
+        // reset list settings
+        $scope.resetSettings = function () {
+
+            $scope.listToken = $scope.listMaster; 
+            console.log($scope.listMaster)
+        };
+
         // store the block in local storage
         $scope.saveProcessBlock = function() {
-
-            localStorage.setItem($scope.sequence.ID, JSON.stringify($scope.sequence));
+            // before to save it we have to test if all the parameters have been filled
+            if (!$scope.check()) {
+                alert('Some parameters are not set: block not saved')
+            }
+            else {
+                localStorage.setItem($scope.sequence.ID, JSON.stringify($scope.sequence));    
+            }
+            
         };
         // get the block by id
         $scope.uploadData = function(id) {
@@ -214,9 +288,15 @@
             } catch (e) {
                 // statements
             }
-            $scope.listSelection = selection.getSelect();
-            $scope.listToken = saveToken.getToken($scope.sequence.Name);
 
+            $scope.listSelection = selection.getSelect();
+            try {
+                $scope.listToken = saveToken.getToken($scope.sequence.Name);
+                $scope.listMaster = $scope.listToken.slice();
+            } catch(e) {
+
+            }
+            
         };
         $scope.reload = function()
         {
@@ -260,21 +340,15 @@
     })
 
     // controller settings ProcessingSequence
-    .controller('CtrlSettingProcessSeq', function($scope, $http, sharedId, sharedPath, listOutputs) {
+    .controller('CtrlSettingProcessSeq', function($scope, $http, sharedId, listOutputs) {
         // take the id 
         var id = sharedId.getProperty();
         // if the id is empty we set the id at 1
         if (id == "")
-            $scope.master = { Name: "Sequence", ID: "1", path: "" };
+            $scope.master = { Name: "Sequence", ID: "1" };
         else
-            $scope.master = { Name: "Sequence", ID: id, path: "" };
-        // send the path to the service
-        $scope.sendPath = function(path) {
-            if (path == "")
-                alert("Path not defined !")
-            else
-                sharedPath.setPath(path);
-        };
+            $scope.master = { Name: "Sequence", ID: id };
+       
         // reset the processing sequence 
         $scope.reset = function() {
             $scope.sequence = angular.copy($scope.master);
@@ -358,6 +432,9 @@
             };
             $scope.sequence.parameters["ParameterSearch"].push(ParameterSearchVar);
         };
+        $scope.deleteSearchCount = function (indexOfSearch) {
+            delete($scope.sequence.parameters["ParameterSearch"][indexOfSearch]["SearchCount"]);
+        };
         // add a value 
         $scope.addCvValues = function(key2, number) {
             $scope.sequence.parameters.ParameterSearch[key2]['Values'].push(number);
@@ -390,7 +467,7 @@
     })
 
     // Controller for the layout (MAIN)
-    .controller("TreeController", function($scope, sharedId, sharedPath, $resource, listOutputs) {
+    .controller("TreeController", function($scope, sharedId, $resource, listOutputs) {
         // delete a node of the tree 
         $scope.delete = function(data) {
             if(data.ID != '1') {
@@ -444,11 +521,22 @@
             if (block) {
                 delete block["NameBlock"];
                 delete block["ID"];
+                if (block['Inputs'].length == 0) {
+                    delete block['Inputs']
+                }
+                if (block['Outputs'].length == 0) {
+                    delete block['Outputs']
+                }
                 block["Parameters"] = [];
                 // for "parameters" we have to take what's inside the list "parameters"
                 if (block.hasOwnProperty("parameters")) {
-                    for (var key3 in block["parameters"]) {
-                            block["Parameters"].push(block["parameters"][key3]);
+                    if(block["parameters"].length == 0) {
+                        delete block["Parameters"]
+                    }
+                    else {
+                        for (var key3 in block["parameters"]) {
+                                block["Parameters"].push(block["parameters"][key3]);
+                        }
                     }
                     // after that we delete it 
                     delete block["parameters"]
@@ -537,17 +625,8 @@
 
         $scope.tree = [{ name: "ProcessingSequence", ID: '1', nodes: [] }];
     })
-
-
-
-
-
     .config(config)
         .run(run);
-
-
-
-
     config.$inject = ['$urlRouterProvider', '$locationProvider'];
 
     function config($urlProvider, $locationProvider, $resourceProvider) {

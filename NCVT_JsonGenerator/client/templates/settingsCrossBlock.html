@@ -41,12 +41,13 @@ controller: CtrlSettingCrossBlock
 			{{key}}:
 			<ul>
 		        <li ng-repeat="(key2,value2) in sequence.parameters['ParameterSearch']"> 
-		            {{key2}} 
 		            <ul ng-repeat=" (key3,value3) in sequence.parameters.ParameterSearch[key2]">
 		            	<!-- if this isn't Values -->
+
 		            	<div ng-show="key3 != 'Values'">
 		            		{{key3}}
 		            		<input type="text" ng-model="sequence.parameters.ParameterSearch[key2][key3]">
+		            		<button ng-if="key3 == 'SearchCount'" ng-click="deleteSearchCount(key2)" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_cancel_small_01.png"></button>
 		            	</div>
 						<!-- if this is Values -->
 		            	<div ng-show="key3 == 'Values'">

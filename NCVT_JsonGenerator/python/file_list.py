@@ -265,7 +265,7 @@ def check_database(csv_file, column_separator=';'):
         for line in csv_database:
 
             line = line.strip().split(column_separator)
-            
+
             # initialisation
             for i in range(len(list_keys)):
                 list_column.append([])
@@ -280,7 +280,14 @@ def check_database(csv_file, column_separator=';'):
                 list_selection[i].append(elem)
         dicti[list_keys[i]] = list_selection[i]
     del dicti['FileName']
-    return dicti
+    list_dict = []
+    print(dicti)
+    for key, value in dicti.items():
+        for elem in value:
+            new_dict = {}
+            new_dict[key] = elem
+            list_dict.append(new_dict)
+    return list_dict
 
 
 def open_files(path):
