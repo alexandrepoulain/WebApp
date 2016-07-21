@@ -10,15 +10,42 @@
     <script src="./assets/js/routes.js"></script>
     <script src="./assets/js/app.js"></script>
     <script type="text/javascript">localStorage.clear();</script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script>
+    var internalDNDType = 'text/x-example'; // set this to something specific to your site
+    function dragStartHandler(event) {
+      if (event.target instanceof HTMLLIElement) {
+        // use the element's data-value="" attribute as the value to be moving:
+        event.dataTransfer.setData(internalDNDType, event.target.dataset.value);
+        event.dataTransfer.effectAllowed = 'move'; // only allow moves
+      } else {
+        event.preventDefault(); // don't allow selection to be dragged
+      }
+    }
+    function dropHandler(event) {
+      var li = document.createElement('li');
+      var data = event.dataTransfer.getData(internalDNDType);
+      if (data == 'fruit-apple') {
+        li.textContent = 'Apples';
+      } else if (data == 'fruit-orange') {
+        li.textContent = 'Oranges';
+      } else if (data == 'fruit-pear') {
+        li.textContent = 'Pears';
+      } else {
+        li.textContent = 'Unknown Fruit';
+      }
+      event.target.appendChild(li);
+    }
+    </script>
   </head>
   <body>
     <div class="primary title-bar" style="padding: 12px;">
-    <span class="title left"><img src="images/mensia-logo-white.png"></span>
-    <span class="right"><h2 style="color: white;">NCVT Json Generator</h2></span>
-      
+    <span class="title left"><img src="images/mensia-logo-white.png" style="height:60px;"></span>
+    <span class="center"><h3 style="color: white;">NCVT Json Generator</h3></span>
+    <span class="right">Copyright © 2016 - Mensia Technologies SA.</span>
            
     </div >
-    <div class="grid-frame">
+    <div class="grid-frame" style="height:85%;">
       <div class="grid-block">
         <script type="text/ng-template"  id="tree_item_renderer.html">
           <button ng-if='data.name == "ProcessingSequence"' ng-click="saveDataId(data.ID); saveJson(data)" ui-sref="settings{{data.name}}" ui-sref-opts="{reload: true}">{{data.name}}</button>
@@ -27,17 +54,13 @@
             <div zf-as-button=""><button style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_add_small_01.png"></button></div>
             <div zf-as-content="" position="bottom">
               <ul>
-                <li><a ng-click="add(data,'ProcessingBlock')">ProcessingBlock</a></li>
+                <li ng-if='data.name != "CrossValidationBlock"'><a ng-click="add(data,'ProcessingBlock')">ProcessingBlock</a></li>
                 <li ng-if='data.name == "ProcessingSequence"'><a ng-click="add(data,'CrossValidationBlock')">CrossValidationBlock</a></li>
                 <!-- if this is a CrossValidationBlock we display the choice for the Training and Validation Block -->
                 
                 <li ng-if='data.name == "CrossValidationBlock"'><a ng-click="add(data,'TrainingProcessingBlock')">TrainingProcessingBlock</a></li>
                 <li ng-if='data.name == "CrossValidationBlock"'><a ng-click="add(data,'ValidationProcessingBlock')">ValidationProcessingBlock</a></li>
 
-                <!-- if this is a TrainingProcessingBlock or a ValidationProcessingBlock:
-                      We can just add processingBlocks -->
-
-                
               </ul>
             </div>
           </div>
@@ -52,6 +75,7 @@
 
             <li ng-repeat="data in tree" ng-include="'tree_item_renderer.html'"></li>
             <button ng-click="saveToPc()" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_download.png" ></button>
+            <button zf-open="help-panel"> open help</button>
             <div ng-controller="ctrl">
             </div>
         </ul>
@@ -61,24 +85,12 @@
       <div class="grid-block">
         <div ui-view></div>
       </div>
-    </div>
-    
-    
-    
-    <footer class="primary title-bar">
-      
-      <div class="main-stage">
-          <div class="logo-container">
-            <div class="logo-white"></div>
-          </div>
-          <div class="text-container">
-            Copyright © 2016 - Mensia Technologies SA. <a href="#/legal">Legal Notice</a> <br>
-            <a href="mailto:contact@mensiatech.com">Contact us</a><br>
-            <a href="mailto:support@mensiatech.com">Offline Analysis support</a>
-          </div>
-        </div>
-     </div>
 
-    </footer>
+    </div>
+    	<zf-notification-set id="error-notifications" position="top-left" ></zf-notification-set>
+	<div id="help-panel" zf-panel="" position="left">
+		<a zf-close="" class="close-button">×</a>
+		<p>Help</p>
+	</div>
   </body>
 </html>

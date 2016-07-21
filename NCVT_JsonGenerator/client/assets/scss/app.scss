@@ -3,12 +3,18 @@
 
 ul {
 	list-style:none;
+    margin-right: 20px;
 }
 li {
     margin-left: 20px;
 }
 button {
 	border-radius: 8px;
+    height: 30px;
+}
+button.button {
+    text-align: middle;
+    line-height: 8px;
 }
 div.bubble span.bubble {
     position: absolute;
@@ -25,3 +31,9 @@ div.bubble span.bubble {
 div.bubble:hover span.bubble {
     transform:scale(1) rotate(0);
 } 
+input {
+    height: 30px;
+}
+div.frame {
+    border-style: groove;
+}

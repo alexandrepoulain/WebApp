@@ -12,122 +12,149 @@
 
         ])
 
-        .factory('JsonService', function($resource) {
-          return $resource('temp/list_script.json');
-        })
+    .factory('JsonService', function($resource) {
+      return $resource('temp/list_script.json');
+    })
 
-        .controller('ctrl', function($scope, JsonService, listScript, saveToken, selection){
-          JsonService.get(function(data){
-            data = data.toJSON();
-            console.log(data)
-            for (var key in data) {
-                if (key == 'Selection'){
-                    selection.sendSelect(data[key])
-                }
-                else{
-                    listScript.sendScriptName(key)
-                }
+    .controller('ctrl', function($scope, JsonService, listScript, saveToken, selection){
+      JsonService.get(function(data){
+        data = data.toJSON();
+        console.log(data)
+        for (var key in data) {
+            if (key == 'Selection'){
+                selection.sendSelect(data[key])
             }
-            saveToken.sendData(data);
-          });
-        })
-        .service('selection',function () {
-            var data = [];
-            return {
-                sendSelect: function (value_select) {
-                    data = value_select
-                },
-                getSelect: function () {
-                    return data 
-                }
-            };
-        })
-         // service for the list script
-        .service('saveToken',function () {
-             var data = {} ;
-             return {
-                // add the data
-                sendData: function (thisData) {
-                    data = thisData ;
-                },
-                // to take the list coresponding to the script  
-                getToken:function (script) {
-                    return data[script]; 
-                }
-             };
-        })
+            else{
+                listScript.sendScriptName(key)
+            }
+        }
+        saveToken.sendData(data);
+      });
+    })
+    .service('selection',function () {
+        var data = [];
+        return {
+            sendSelect: function (value_select) {
+                data = value_select
+            },
+            getSelect: function () {
+                return data 
+            }
+        };
+    })
+     // service for the list script
+    .service('saveToken',function () {
+         var data = {} ;
+         return {
+            // add the data
+            sendData: function (thisData) {
+                data = thisData ;
+            },
+            // to take the list coresponding to the script  
+            getToken:function (script) {
+                return data[script]; 
+            }
+         };
+    })
 
-        // service for the list script
-        .service('listScript',function () {
-             var listScript = [] ;
-             return {
-                // add a script
-                sendScriptName: function (scriptName) {
-                     listScript.push(scriptName) ;
-                },
-                // to take the list 
-                getlistScript:function () {
-                     return listScript; 
-                }
-             };
-        })
+    // service for the list script
+    .service('listScript',function () {
+         var listScript = [] ;
+         return {
+            // add a script
+            sendScriptName: function (scriptName) {
+                 listScript.push(scriptName) ;
+            },
+            // to take the list 
+            getlistScript:function () {
+                 return listScript; 
+            }
+         };
+    })
 
-        // service for the list of outputs
-        .service('listOutputs',function () {
-             var list = [] ;
-             return {
-                // add an output: the value associated to the key output
-                addOutput: function (element) {
-                     list.push(element); 
-                },
-                // to take the list 
-                getList:function () {
-                     return list; 
-                }
-             };
-        })
-        // service to share the id 
-        .service('sharedId', function() {
-            var property = "";
-            return {
-                getProperty: function() {
-                    return property;
-                },
-                setProperty: function(value) {
-                    property = value;
-                }
-            };
-        })
-        // service for parsing tokens ncvt
-        .service('tokenNCVT', function(){
-            return {
-                parseTokenNCVT: function(value) {
-                    var list_original = ['all', 'each_temp', 'each_original', 'all_temp', 'all_original', 'vc', 'dbdesc']
-                    // find the ncvt tokens and test them
-                    var Regex = /[^{}]+(?=\})/g ;
-                    var list_token = value.match(Regex);
-                    if(list_token){
-                        for (var i = 0; i < list_token.length; i++) {
-                            var token = list_token[i];
-                            if (list_original.indexOf(token) == -1 ) {
-                                return false;
-                            }
+    // service for the list of outputs
+    .service('listOutputs',function () {
+         var list = [] ;
+         return {
+            // add an output: the value associated to the key output
+            addOutput: function (element) {
+                 list.push(element); 
+            },
+            // to take the list 
+            getList:function () {
+                 return list; 
+            }
+         };
+    })
+    // service to share the id 
+    .service('sharedId', function() {
+        var property = "";
+        return {
+            getProperty: function() {
+                return property;
+            },
+            setProperty: function(value) {
+                property = value;
+            }
+        };
+    })
+    // service for parsing tokens ncvt
+    .service('tokenNCVT', function(){
+        return {
+            parseTokenNCVT: function(value) {
+                var list_original = ['all', 'each_temp', 'each_original', 'all_temp', 'all_original', 'cv', 'dbdesc']
+                // find the ncvt tokens and test them
+                var Regex = /[^{}]+(?=\})/g ;
+                var list_token = value.match(Regex);
+                if(list_token){
+                    for (var i = 0; i < list_token.length; i++) {
+                        var token = list_token[i];
+                        if (list_original.indexOf(token) == -1 ) {
+                            return false;
                         }
                     }
-                    return true;
                 }
-            };  
-        })
+                return true;
+            }
+        };  
+    })
+
+    .service('postNotif', function(FoundationApi){
+        return {
+            postError: function(msg) {
+                FoundationApi.publish('error-notifications',            
+                    { 
+                        image: 'images/red_alert.png',
+                        title: 'Error', 
+                        content: msg,
+                        autoclose: 4000
+                    }
+                );
+            },
+            postWarn: function (msg) {
+                FoundationApi.publish('warn-notifications'   , 
+                    { 
+                        image: 'images/blue_alert.png',
+                        title: 'Warning', 
+                        content: msg,
+                        autoclose: 4000
+                    }
+                );
+            }
+        };
+    })
 
 
 
     // control settings ProcessingBlock
-    .controller('CtrlSettingProcessBlock', function($scope, sharedId, listOutputs, listScript, saveToken, selection, tokenNCVT) {
+    .controller('CtrlSettingProcessBlock', function($scope, sharedId, listOutputs, listScript, saveToken, selection, tokenNCVT, postNotif) {
+        $scope.list1 = {title: 'AngularJS - Drag Me'};
+        $scope.list2 = {};
         // when we call the controller we take the 
         var id = sharedId.getProperty();
         // creation of the block 
         $scope.master = { NameBlock: "ProcessingBlock", ID: id, Name: "", Interpreter: "", Selection: [], Inputs: [], Outputs: [], parameters: [] };
-        
+        $scope.listNCVTSpecial = ['${each_temp}', '${each_original}', '${all_temp}', '${all_original}', '${dbdesc}' ,'${cv}']
         // change list of interpreter
         $scope.uploadInterpreter = function(scriptName){
             if (scriptName.endsWith('.mxs') || scriptName.endsWith('.xml')){
@@ -230,8 +257,56 @@
         };
         // needed to the initialisation
         $scope.reset();
+
         // check if all the parameters have been filled
         $scope.check = function () {
+            // go through the keys and check the content
+            for (var key in $scope.sequence) {
+                if (key == 'Name') {
+                    if ($scope.sequence['Name'] == "") {
+                        postNotif.postError('No Name !');
+                        return false;
+                    }
+                }
+                if (key == 'Interpreter') {
+                    if ($scope.sequence['Interpreter'] == "") {
+                        postNotif.postError('No Interpreter !');
+                        return false;
+                    }
+                }
+                if (key == 'Selection') {
+                    if ($scope.sequence['Selection'].length == 0 && $scope.sequence['Selection'] != '${all}') {
+                        postNotif.postError('Wrong Selection !');
+                        return false;
+                    }
+                }
+                if (key == 'Inputs') {
+                    if ($scope.sequence['Inputs'].length == 0) {
+                        postNotif.postWarn('No Inputs !');
+                        return false;
+                    }
+                }
+                if (key == 'Outputs') {
+                    if ($scope.sequence['Outputs'].length == 0) {
+                        postNotif.postWarn('No Outputs !');
+                        return false;
+                    }
+                }
+                if (key == 'parameters') {
+                    if ($scope.sequence['parameters'].length == 0) {
+                        postNotif.postWarn('No parameters !');
+                        return false;
+                    }
+                }
+            }
+            if (!$scope.comparison()) {
+                postNotif.postError('A token is not defined !');
+                return false;
+            }
+            
+               
+        };
+        $scope.comparison = function () {
             // go through the block created
             // find the keys in Inputs, Outputs and Parameters
             // push all the keys in a global list
@@ -269,12 +344,8 @@
         // store the block in local storage
         $scope.saveProcessBlock = function() {
             // before to save it we have to test if all the parameters have been filled
-            if (!$scope.check()) {
-                alert('Some parameters are not set: block not saved')
-            }
-            else {
-                localStorage.setItem($scope.sequence.ID, JSON.stringify($scope.sequence));    
-            }
+            $scope.check()
+            localStorage.setItem($scope.sequence.ID, JSON.stringify($scope.sequence));    
             
         };
         // get the block by id
@@ -375,11 +446,14 @@
 
     // control settings CrossValidationBlock
     // In function of the type of cross validation we change the parameters of the block 
-    .controller('CtrlSettingCrossBlock', function($scope, sharedId, listOutputs) {
+    .controller('CtrlSettingCrossBlock', function($scope, sharedId, listOutputs, postNotif) {
         // take the id of the node
         var id = sharedId.getProperty();
         // var for the reset
-        $scope.master = { NameBlock: "CrossValidationBlock", ID: id, "CrossValidationType": "" };
+        $scope.master = { NameBlock: "CrossValidationBlock", ID: id };
+        $scope.addCrossValidation = function () {
+            $scope.sequence['CrossValidationType'] = "" ;
+        }
         // function to choose the type of CV we want
         $scope.chooseTypeCV = function(type) {
             // in function on the type we give the parameters
@@ -399,13 +473,17 @@
             }
 
         };
-
+        $scope.setTypeRange = function (key_block, value) {
+            $scope.sequence.ParameterSearch[key_block]['TypeRange'] = value ; 
+        };
+        $scope.setSearchType = function (key_block, value) {
+            $scope.sequence.ParameterSearch[key_block]['SearchType'] = value ;
+        };
         // add the CV Outputs (we make a list of them)
         $scope.addCVOutput = function(temp1, value1) {
             var object = {};
             object[temp1] = value1;
             $scope.sequence.CrossValidationOutput.push(object);
-            $scope.saveCrossBlock();
             // send the output to the shared list 
             listOutputs.addOutput(value1);
         };
@@ -436,17 +514,31 @@
         // add a value 
         $scope.addCvValues = function(key2, number) {
             $scope.sequence.ParameterSearch[key2]['Values'].push(number);
-            $scope.saveCrossBlock();
         };
         // set TypeValue 
         $scope.setTypeValue = function (key2, typeValue) {
             $scope.sequence.ParameterSearch[key2]['TypeValue'] = typeValue ; 
-        }
+        };
         // set the OptimizationType
         $scope.setOptimizationType = function(param) {
             $scope.sequence['OptimizationType'] = param ;
-            $scope.saveCrossBlock();
-        }
+        };
+
+        $scope.deleteParam = function (indexParam) {
+            $scope.sequence['ParameterSearch'].splice(indexParam, 1)
+            console.log($scope.sequence)
+        };
+        $scope.resetParam = function (indexParam) {
+            var ParameterSearchVar = {
+                "Name": "",
+                "TypeValue": "",
+                "TypeRange": "",
+                "Values": [],
+                "SearchType": "",
+                "SearchCount": ""
+            };
+            $scope.sequence['ParameterSearch'][indexParam] = ParameterSearchVar;
+        };
 
         // reset of the block
         $scope.reset = function() {
@@ -455,7 +547,9 @@
         $scope.reset();
         // save the block to local storage
         $scope.saveCrossBlock = function() {
+            $scope.checkCrossValidation()
             localStorage.setItem($scope.sequence.ID, JSON.stringify($scope.sequence));
+            
         };
         // find the block saved for the id 
         $scope.uploadData = function(id) {
@@ -467,10 +561,113 @@
                 console.log("No id for the session");
             }
         };
+        // check all the fields in the crossValidationBlock
+        $scope.checkCrossValidation = function () {
+            // go through the elements of the crossValidationBlock and make verification
+            for (var key in $scope.sequence) {
+                // check CrossValidationType
+                if (key == 'CrossValidationType') {
+                    if ($scope.sequence[key] != 'k-fold' && $scope.sequence[key] != 'leave-one-out' && $scope.sequence[key] != 'bootstrapping' && $scope.sequence[key] != 'leave-one-label-out') {
+                        postNotif.postError('Enter a CrossValidationType')
+                        return false ;
+                    }
+                }
+                // check CrossValidationCount
+                if (key == 'CrossValidationCount') {
+                    if ($scope.sequence[key] == null) {
+                        postNotif.postError('Enter a CrossValidationCount')
+                        return false ;
+                    }
+                }
+                // check CrossValidationOutputs
+                if (key == 'CrossValidationOutput') {
+                    if($scope.sequence[key].length == []) {
+                        postNotif.postError('Enter a CrossValidationOutput')
+                        return false ;
+                    }
+                }
+                // check OptimizedOutput
+                if (key == 'OptimizedOutput') {
+                    if ($scope.sequence[key].length == 0) {
+                        postNotif.postError('Enter a OptimizedOutput')
+                        return false ;
+                    }
+                }
+                // check OptimizationType
+                if (key == 'OptimizationType') {
+                    if ($scope.sequence[key].length == 0) {
+                        postNotif.postError('Enter a OptimizationType')
+                        return false ;
+                    }
+                }
+                // check ParameterSearch
+                if (key == 'ParameterSearch') {
+                    if ($scope.sequence[key].length == 0) {
+                        postNotif.postError('Enter add a parameter to searched or delete ParameterSearch')
+                        return false ;
+                    }
+                    // else we go in and check for each ParameterSearchBlock
+                    else {
+                        for (var index_block in $scope.sequence[key]) {
+                            if(!$scope.checkParameterSearch($scope.sequence[key][index_block])) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        $scope.checkParameterSearch = function (ps_block) {
+            // go through the keys of ParameterSearchBlock
+            for (var key in ps_block) {
+                // check name
+                if (key == 'Name') {
+                    if (ps_block[key].length == 0) {
+                        postNotif.postError('Need a name for ParameterSearch')
+                        return false ;
+                    }
+                }
+                // check TypeValue
+                if (key == 'TypeValue') {
+                    if (ps_block[key] != 'float' && ps_block[key] != 'string' && ps_block[key] != 'boolean' && ps_block[key] != 'integer') {
+                        postNotif.postError('Need a TypeValue')
+                        return false ;
+                    }
+                }
+                // check TypeRange
+                if (key == 'TypeRange') {
+                    if (ps_block[key] != 'bound' && ps_block[key] != 'step' && ps_block[key] != 'enum') {
+                        postNotif.postError('Need TypeRange')
+                        return false;
+                    }
+                }
+                // check Values
+                if (key == 'Values') {
+                    if (ps_block[key].length == 0) {
+                        postNotif.postError('Enter a CrossValidationType')
+                        return false;
+                    }
+                }
+                // check SearchType
+                if (key == 'SearchType') {
+                    if (ps_block[key] != 'gridSearch' && ps_block[key] != 'randomSearch') {
+                        postNotif.postError('Need a SearchType')
+                        return false;
+                    }
+                }
+                // check SearchCount
+                if (key == 'SearchCount') {
+                    if (ps_block[key].length == 0) {
+                        postNotif.postError('Need a SearchCount or delete it')
+                        return false;
+                    }
+                }
+            }
+            return true;
+        };
     })
-
     // Controller for the layout (MAIN)
-    .controller("TreeController", function($scope, sharedId, $resource, listOutputs) {
+    .controller("TreeController", function($scope, sharedId, $resource, listOutputs, postNotif) {
         // delete a node of the tree 
         $scope.delete = function(data) {
             if(data.ID != '1') {
@@ -560,31 +757,63 @@
                     for (var j = 0, length2 = data.nodes.length; j < length2; j++) {
                         // parse the son
                         var son = $scope.parseData(data.nodes[j]);
-                        object.push(son);
+                        if (son) {
+                            object.push(son);    
+                        }
+                        else {
+                            return false;
+                        }
+                        
                     }
+                }
+                else if (data.nodes.length == 0 && data.name == 'ProcessingSequence') {
+                    postNotif.postError('ProcessingSequence empty')
+                    return false;
+                }
+                else if (data.nodes.length == 0 && data.name == 'TrainingProcessingBlock') {
+                    postNotif.postError('A TrainingProcessingBlock is empty')
+                    return false;
+                }
+                else if (data.nodes.length == 0 && data.name == 'ValidationProcessingBlock') {
+                    postNotif.postError('A ValidationProcessingBlock is empty')
+                    return false;
                 }
             } else if (data.name == "CrossValidationBlock" || data.name == "ProcessingBlock") {
                 // if this is a CrossValidationBlock/ProcessingBlock we create an object
                 var object = {};
                 var object_temp = {};
-                // if it has sons 
+                // add the parameters of the block
+                for (var key2 in block) {
+                    object[key2] = block[key2];
+                } 
+                // if it has sons
                 if (data.nodes.length != 0) {
                     // we take his sons 
                     for (var j = 0, length2 = data.nodes.length; j < length2; j++) {
                         // parse the son 
                         var son = $scope.parseData(data.nodes[j]);
-                        for (var key in son) {
+                        if(son) {
+                            for (var key in son) {
                             object_temp[key] = son[key];
                             object = angular.extend(object, object_temp);
+                            }   
                         }
+                        else {
+                            return false;
+                        }
+                        
                     }
                 }
-                // add the parameters of the block
-                for (var key2 in block) {
-                    object[key2] = block[key2];
+                else {
+                    if (data.name == "CrossValidationBlock" ) {
+                        postNotif.postError('A CrossValidationBlock is empty'); 
+                        return false;  
+                    }
+                    
                 }
+                
             }
-            //  the block to return we create
+            // the block to return 
             var element = {}
             element[data.name] = object;
             return element;
@@ -595,11 +824,15 @@
         // save the .json on local storage: we have to begin from the processingSequence node
         $scope.saveJson = function(data) {
             var newData = $scope.parseData(data);
-            // after the parsing we have a good object to save
-            localStorage.setItem("dataToSave", angular.toJson(newData, 4));
+            if (newData) {
+                // after the parsing we have a good object to save
+                localStorage.setItem("dataToSave", angular.toJson(newData, 4));    
+            }
+            
         };
         // to save on the pc 
         $scope.saveToPc = function() {
+            $scope.saveJson($scope.tree[0])
             var data = localStorage.getItem("dataToSave");
             var filename ;
             if (!data) {
@@ -614,7 +847,7 @@
             if (typeof data === 'object') {
                 data = JSON.stringify(data, undefined, 2);
             }
-
+            
             var blob = new Blob([data], { type: 'text/json' }),
                 e = document.createEvent('MouseEvents'),
                 a = document.createElement('a');
@@ -622,9 +855,12 @@
             a.download = filename;
             a.href = window.URL.createObjectURL(blob);
             a.dataset.downloadurl = ['text/json', a.download, a.href].join(':');
+            console.log(a)
             e.initEvent('click', true, false, window,
                 0, 0, 0, 0, 0, false, false, false, false, 0, null);
             a.dispatchEvent(e);
+            window.close();
+            
         };
         // save the id 
         $scope.saveDataId = function(id) {

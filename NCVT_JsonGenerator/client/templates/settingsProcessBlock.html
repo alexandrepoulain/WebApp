@@ -3,22 +3,21 @@ name: settingsProcessingBlock
 url: /settings/ProcessingBlock
 controller: CtrlSettingProcessBlock
 ---
+
 <div  ng-controller="CtrlSettingProcessBlock" ng-init="uploadData(sequence.ID); ">
-  <form >
-    <h2>{{ sequence.NameBlock }}</h2>
-    ID: {{ sequence.ID }}<br>
-    <br><br>
+    <form >
+    <h3>{{ sequence.NameBlock }}</h3>
 
-    Name of the script<br>
-    <input list="suggestScript" type="text" ng-model="sequence.Name" ng-change="uploadData(sequence.ID); uploadInterpreter(sequence.Name)">
-    <datalist id="suggestScript">
-            <option ng-repeat="x in listScript" value="{{x}}" >
-    </datalist>
+    Name of the script
 
-    Interpreter <br>
-    <input type="text" ng-model="sequence.Interpreter">
-    
-    Selection <br>
+    <select id="suggestScript" ng-model="sequence.Name" ng-change="uploadData(sequence.ID); uploadInterpreter(sequence.Name)" style="height:40px">
+            <option ng-repeat="x in listScript" value="{{x}}" >{{x}}</option>
+    </select>
+
+    Interpreter 
+    <input type="text" ng-model="sequence.Interpreter" style="height:30px">
+
+    Selection 
     <ul ng-if="sequence.Selection != '${all}'">
         <li ng-repeat="(key, value) in sequence.Selection">
             <span class="inline-label">
@@ -37,22 +36,16 @@ controller: CtrlSettingProcessBlock
     </ul>
     <div class="bubble">
         <span class="inline-label">
-       
-            <input list="selct" type="text" ng-model="temp_select">
+            <input list="selct" type="text" ng-model="temp_select" style="height:30px">
             <span class="bubble">${all}</span>
-        
             <button style="outline:none;background-color: Transparent;border: none;" ng-click="addSelection(temp_select)"><img src="images/icon_add_small_01.png"></button>
             <datalist id="selct">
                 <option ng-repeat="x in listSelection" value="{{x}}">
-
             </datalist>
-           
         </span>
     </div>
 
-    <!-- encore du push node ici -->
-   
-    Inputs <br>
+    Inputs 
     <ul>
         <li ng-repeat="(keyIN, valueIN) in sequence.Inputs">
             <span class="inline-label">
@@ -62,8 +55,8 @@ controller: CtrlSettingProcessBlock
             
         </li>
     </ul>
-    
-    Outputs<br>
+
+    Outputs
     <ul>
         <li ng-repeat="(keyOUT, valueOUT) in sequence.Outputs">
             <span class="inline-label">
@@ -72,7 +65,7 @@ controller: CtrlSettingProcessBlock
             </span>
         </li>
     </ul>
-    Parameters <br>
+    Parameters      
     <ul>
         <li ng-repeat="(keyPA, valuePA) in sequence.parameters">
             <span class="inline-label">
@@ -81,36 +74,49 @@ controller: CtrlSettingProcessBlock
             </span>
         </li>
     </ul>
-    Settings <br>
-    <ul>
-        <li ng-repeat="key1 in listToken"> 
-            <div class="bubble">
-                <span class="inline-label">
-                    {{key1}}: 
-                    <input type="text" ng-model="temp1" placeholder="value">
-                    <span class="check" ng-show="sequence.Inputs[temp1] == false"><img src="images/alert.png">Wrong token</span>
-                    <span class="bubble">${each_temp}, ${each_original}, ${all_temp}, ${all_original}, ${dbdesc}</span>
-                    <div zf-action-sheet="">
-                        <span class="inline-label">
-                            <div zf-as-button=""><button style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_add_small_01.png"></button></div>
-                            <button ng-click="deleteInList($index)" style="outline:none;background-color: Transparent;border: none;""><img src="images/icon_cancel_small_01.png"></button>
-                        </span>
-                        <div zf-as-content="" position="bottom">
-                            <ul>
-                                <li><a ng-click="addInputs(key1,temp1)">Inputs</a></li>
-                                <li><a ng-click="addOutputs(key1,temp1)">Outputs</a></li>
-                                <li><a ng-click="addParameter(key1,temp1)">Parameters</a></li>
-                            </ul>
+    <div zf-panel="" position="right" id="settings" style="width: 600px;">
+        <a zf-close="" class="close-button">×</a>
+        <h3> Settings</h3> 
+        <hr>
+        <ul>
+            <li ng-repeat="key1 in listToken"> 
+                <div class="bubble">
+                    <span class="inline-label">
+                        {{key1}}: 
+                        
+                        <input type="text" ng-model="temp1" placeholder="value" style="height:30px" ondrop="drop(event)" ondragover="allowDrop(event)">
+                        <span class="check" ng-show="sequence.Inputs[temp1] == false"><img src="images/alert.png">Wrong token</span>
+                        <div zf-action-sheet="">
+                            <span class="inline-label">
+                                <div zf-as-button=""><button style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_add_small_01.png"></button></div>
+                                
+                            </span>
+                            <div zf-as-content="" position="bottom">
+                                <ul>
+                                    <li><a ng-click="addInputs(key1,temp1)">Inputs</a></li>
+                                    <li><a ng-click="addOutputs(key1,temp1)">Outputs</a></li>
+                                    <li><a ng-click="addParameter(key1,temp1)">Parameters</a></li>
+                                </ul>
+                            </div>
                         </div>
-                </span>
-            </div>
-        </li>
-    </ul>
-     <button ng-click="resetSettings()" >Reset settings</button> <br>
-
-    
-    <button ng-click="saveProcessBlock(); uploadData(sequence.ID);" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_add_01.png"></button>
+                        <button ng-click="deleteInList($index)" style="outline:none;background-color: Transparent;border: none;""><img src="images/icon_cancel_small_01.png"></button>
+                    </span>
+                </div>
+            </li>
+            
+            <ul style="column-count: 2; column-gap: 20px;" >
+                <li ng-repeat="token in listNCVTSpecial" draggable="true" ondragstart="drag(event)" id="drag1">
+                    {{token}}
+                </li>
+            </ul>
+        </ul>
+    </div>
+    <button zf-open="settings">Add Settings</button>
+    <button ng-click="resetSettings()">Reset settings</button> 
+    <br>
+    <button ng-click="saveProcessBlock()" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_add_01.png"></button>
     <button ng-click="reset()" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_cancel_01.png" ></button>
-  </form>
-  
+    </form>
+    <zf-notification-set id="error-notifications" position="top-left" ></zf-notification-set>
+    <zf-notification-set id="warn-notifications" position="top-left" ></zf-notification-set>
 </div>

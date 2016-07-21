@@ -4,13 +4,10 @@ url: /settings/CrossValidationBlock
 controller: CtrlSettingCrossBlock
 ---
 <div  ng-controller="CtrlSettingCrossBlock" ng-init="uploadData(sequence.ID)">
-  <form  ng-submit="saveCrossBlock()" ">
-    <h2>CrossValidationBlock</h2>
-    ID: {{ sequence.ID }}<br>
-    <br><br>
-    <!-- show the choices just if no choice had been made -->
-    		
-				
+  <form >
+    <h3>CrossValidationBlock</h3>
+	<button class="button" ng-show="!sequence.hasOwnProperty('CrossValidationType')" ng-click="addCrossValidation()">Add CrossValidation</button>
+
 	<!-- show the parameters and fill the form -->
 	<div ng-repeat="(key, value) in sequence">
 		<!-- If this is not a list -->
@@ -21,12 +18,13 @@ controller: CtrlSettingCrossBlock
 					<button class="button" ng-click="chooseTypeCV('k-fold')">k-fold</button>
 					<button class="button" ng-click="chooseTypeCV('leave-one-out')">leave-one-out</button>
 					<button class="button" ng-click="chooseTypeCV('bootstrapping')">bootstrapping</button>
-					<button class="button" ng-click="chooseTypeCV('leave-one-label-out')">leave one label out</button>			
+					<button class="button" ng-click="chooseTypeCV('leave-one-label-out')">leave-one-label-out</button>
 				</span>	
 			</div>
-			<div ng-if="key != 'CrossValidationOutput' && key != 'ParameterSearch' && key != 'OptimizationType' && key != 'CrossValidationType'">
+			<br>
+			<div ng-if="key == 'CrossValidationCount'">
 				{{key}}:
-				<input type="text" ng-model="sequence[key]" placeholder="value" >
+				<input type="number" ng-model="sequence['CrossValidationCount']" placeholder="value" style="height:30px">
 			</div>
 			<!-- If this is a list -->
 			<div ng-if="key == 'CrossValidationOutput'">
@@ -37,40 +35,65 @@ controller: CtrlSettingCrossBlock
 			        </li>
 			    </ul>
 				<span class="inline-label">
-			        <input type="text" ng-model="temp1" placeholder="key"><input type="text" ng-model="value1" placeholder="value"><a class="button" ng-click="addCVOutput(temp1,value1)">+</a> 
+			        <input type="text" ng-model="temp1" placeholder="key" style="height:30px"><input type="text" ng-model="value1" placeholder="value" style="height:30px"><a class="button" ng-click="addCVOutput(temp1,value1)" style="height:30px">+</a> 
 			    </span>
 			</div>
 			
 			<div ng-if="key == 'ParameterSearch'">
 				{{key}}:
 				<ul>
-			        <li ng-repeat="(key2,value2) in sequence['ParameterSearch']"> 
-			            <ul ng-repeat=" (key3,value3) in sequence.ParameterSearch[key2]">
-			            	<!-- if this isn't Values -->
-			            	<div ng-if="key3 == 'Values'">
-			            		{{key3}}: 
-			            		<input type="text" ng-model="sequence.ParameterSearch[key2][key3]">
-			            	</div>
-							<div ng-if="key3 == 'TypeValue'">
-								{{key3}}: {{value3}}
-								<span ng-show="sequence.ParameterSearch[key2]['TypeValue'] == ''">
-									<button class="button" ng-click="setTypeValue(key2, 'float')">float</button>
-									<button class="button" ng-click="setTypeValue(key2, 'integer')">integer</button>
-									<button class="button" ng-click="setTypeValue(key2, 'boolean')">boolean</button>
-									<button class="button" ng-click="setTypeValue(key2, 'string')">string</button>
-								</span>
-							</div>
-			            	
-							<!-- if this is Values -->
-			            	<div ng-show="key3 == 'Values'">
-			            		{{key3}}: {{value3}}
-								<span class="inline-label">
-							        <input type="number" ng-model="number" placeholder="value"><a class="button" ng-click="addCvValues(key2,number)">+</a> 
-							    </span>
-			            	</div>
-			            	
-			            </ul>
-			            	
+					
+				    <li ng-repeat="(key2,value2) in sequence['ParameterSearch']"> 
+				        <div class="frame">
+				            <ul ng-repeat=" (key3,value3) in sequence.ParameterSearch[key2]">
+				            	<!-- if this isn't Values -->
+				            	<div ng-if="key3 == 'Name'">
+				            		{{key3}}:
+				            		<input type="text" placeholder="Name" ng-model="sequence.ParameterSearch[key2][key3]">
+				            	</div>
+								<div ng-if="key3 == 'TypeValue'">
+									{{key3}}: {{value3}}
+									<span ng-show="sequence.ParameterSearch[key2]['TypeValue'] == ''">
+										<button class="button" ng-click="setTypeValue(key2, 'float')">float</button>
+										<button class="button" ng-click="setTypeValue(key2, 'integer')">integer</button>
+										<button class="button" ng-click="setTypeValue(key2, 'boolean')">boolean</button>
+										<button class="button" ng-click="setTypeValue(key2, 'string')">string</button>
+									</span>
+								</div>
+								<div ng-if="key3 == 'TypeRange'">
+									{{key3}}: {{value3}}
+									<span ng-show="sequence.ParameterSearch[key2]['TypeRange'] == ''">
+										<button class="button" ng-click="setTypeRange(key2, 'bound')">bound</button>
+										<button class="button" ng-click="setTypeRange(key2, 'step')">step</button>
+										<button class="button" ng-click="setTypeRange(key2, 'enum')">enum</button>
+									</span>
+								</div>
+								<div ng-if="key3 == 'SearchType'">
+									{{key3}}: {{value3}}
+									<span ng-show="sequence.ParameterSearch[key2]['SearchType'] == ''">
+										<button class="button" ng-click="setSearchType(key2, 'gridSearch')">gridSearch</button>
+										<button class="button" ng-click="setSearchType(key2, 'randomSearch')">randomSearch</button>
+									</span>
+								</div>
+								<div  ng-if="key3 == 'SearchCount'">
+									{{key3}}
+									<span class="inline-label">
+										<input type="number" placeholder="SearchCount" value="sequence.ParameterSearch[key2][key3]">
+										<button ng-click="deleteSearchCount(key2)" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_cancel_small_01.png"></button>
+									</span>
+								</div>
+				            	
+								<!-- if this is Values -->
+				            	<div ng-show="key3 == 'Values'">
+				            		{{key3}}: {{value3}}
+									<span class="inline-label">
+								        <input type="number" ng-model="number" placeholder="value"><a class="button" ng-click="addCvValues(key2,number)">+</a> 
+								    </span>
+				            	</div>
+				            </ul>
+				            <button ng-click="deleteParam($index)">Delete Parameter</button>
+				            <button ng-click="resetParam($index)">Reset Parameter</button>
+						</div>
 			        </li>
 			    </ul>
 			    <button class="button" ng-click="addParameterSearch()">Add parameter</button>
@@ -84,6 +107,11 @@ controller: CtrlSettingCrossBlock
 					<button class="button" ng-click="setOptimizationType('none')">none</button>
 				</span>
 			</div>
+			<div ng-if="key == 'OptimizedOutput' " >
+				{{key}}:
+				<span class="inline-label"><input type="text" ng-model="sequence['OptimizedOutput']" placeholder="Output"></span>
+				
+			</div>
 		</div>
 	</div>
 	<!-- Once the type chosen, do you want a parameterSearch (if there is not yet)-->
@@ -92,7 +120,8 @@ controller: CtrlSettingCrossBlock
 	 </span>
 	 
 	<br>
-    <button ngClick="Submit" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_add_01.png"></button>
+    <button ng-click="saveCrossBlock()" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_add_01.png"></button>
     <button ng-click="reset()" style="outline:none;background-color: Transparent;border: none;"><img src="images/icon_cancel_01.png" ></button>
   </form>
+	<zf-notification-set id="error-notifications" position="top-left" ></zf-notification-set>
 </div>

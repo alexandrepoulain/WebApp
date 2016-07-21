@@ -1,0 +1,2 @@
+path=/home/alexandre/Bureau/mensia-research/projects/pymensia/examples/ncvt/processing_RiemannianGeometry
+name=d

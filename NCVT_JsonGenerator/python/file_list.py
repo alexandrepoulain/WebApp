@@ -321,5 +321,12 @@ def open_files(path):
     except:
         raise ValueError("abording ...")
 
-path = input("Enter the path of your directory:")
+path = input('Enter the path of your directory: ')
 open_files(path)
+# take the name of the json file for output
+file_name = input('Enter the name of the output json file: ')
+# open a txt in temp and put in it the pathe of the directory and the
+# name of the json file
+with open('../client/temp/info.txt', 'w') as info_file:
+    info_file.write('path=' + path + '\n')
+    info_file.write('name=' + file_name)
